@@ -19,6 +19,7 @@ const GITHUB_APP_URL = GITHUB_REPO_URL
 
 interface LandingPageProps {
   onOpenWorkspace: () => void
+  onPrivacy: () => void
 }
 
 function useInstallCopy() {
@@ -51,6 +52,18 @@ function NpmInstallBlock({ className = '', onCopy, copied }: { className?: strin
         )}
       </button>
       <p className="mt-3 max-w-md text-[13px] leading-relaxed text-neutral-500">{getInstallHint()}</p>
+      <p className="mt-2 max-w-md text-[12px] leading-relaxed text-neutral-400">
+        Windows installers are code-signed through the{' '}
+        <a
+          href="https://signpath.org/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-neutral-600 underline underline-offset-2 hover:text-neutral-800"
+        >
+          SignPath Foundation
+        </a>{' '}
+        for open-source projects.
+      </p>
       {copied && (
         <p className="mt-2 max-w-md text-[13px] font-medium text-emerald-600">Copied — paste into Terminal or CMD.</p>
       )}
@@ -58,7 +71,7 @@ function NpmInstallBlock({ className = '', onCopy, copied }: { className?: strin
   )
 }
 
-export function LandingPage({ onOpenWorkspace }: LandingPageProps) {
+export function LandingPage({ onOpenWorkspace, onPrivacy }: LandingPageProps) {
   const { copied, copy } = useInstallCopy()
   const scrollToFeatures = () => {
     document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })
@@ -181,22 +194,39 @@ export function LandingPage({ onOpenWorkspace }: LandingPageProps) {
       </section>
 
       <footer className="border-t border-neutral-200/80 py-8">
-        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-6 text-[14px] text-neutral-500 md:flex-row">
-          <div className="flex items-center gap-2 opacity-80">
-            <PrismBrand size="footer" showText={false} />
-            <span>© 2026 PRISM</span>
+        <div className="mx-auto max-w-6xl px-6 text-[14px] text-neutral-500">
+          <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
+            <div className="flex items-center gap-2 opacity-80">
+              <PrismBrand size="footer" showText={false} />
+              <span>© 2026 PRISM</span>
+            </div>
+            <div className="flex flex-wrap justify-center gap-6">
+              <a href={GITHUB_APP_URL} target="_blank" rel="noopener noreferrer" className="hover:text-neutral-800">
+                GitHub
+              </a>
+              <button type="button" onClick={() => void copy()} className="hover:text-neutral-800">
+                Install
+              </button>
+              <button type="button" onClick={onPrivacy} className="hover:text-neutral-800">
+                Privacy
+              </button>
+              <button type="button" onClick={onOpenWorkspace} className="hover:text-neutral-800">
+                Workspace
+              </button>
+            </div>
           </div>
-          <div className="flex gap-6">
-            <a href={GITHUB_APP_URL} target="_blank" rel="noopener noreferrer" className="hover:text-neutral-800">
-              GitHub
-            </a>
-            <button type="button" onClick={() => void copy()} className="hover:text-neutral-800">
-              Install
-            </button>
-            <button type="button" onClick={onOpenWorkspace} className="hover:text-neutral-800">
-              Workspace
-            </button>
-          </div>
+          <p className="mt-4 text-center text-[12px] text-neutral-400">
+            Windows installers code-signed via the{' '}
+            <a
+              href="https://signpath.org/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline underline-offset-2 hover:text-neutral-600"
+            >
+              SignPath Foundation
+            </a>{' '}
+            (open-source program)
+          </p>
         </div>
       </footer>
     </AuroraBackground>
