@@ -2,7 +2,6 @@ import React, { useCallback, useEffect, useState } from 'react'
 import { LandingPage } from './components/prism/LandingPage'
 import { WorkspaceShell } from './components/prism/WorkspaceShell'
 import { isDesktopApp } from './lib/desktop-bridge'
-import { downloadInstaller } from './lib/downloads'
 
 export type PrismView = 'landing' | 'workspace'
 
@@ -43,12 +42,7 @@ const App: React.FC = () => {
       return <WorkspaceShell />
     case 'landing':
     default:
-      return (
-        <LandingPage
-          onInstall={() => void downloadInstaller()}
-          onOpenWorkspace={() => goTo('workspace')}
-        />
-      )
+      return <LandingPage onOpenWorkspace={() => goTo('workspace')} />
   }
 }
 

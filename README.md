@@ -35,10 +35,10 @@ npm run dev
 
 ## Install desktop app (recommended)
 
-Requires Node.js 18+. Creates a desktop shortcut on Windows, macOS, and Linux:
+Requires Node.js 18+. Downloads PRISM from GitHub Releases and creates a desktop shortcut on Windows, macOS, and Linux.
 
 ```bash
-npx @prism/install
+npx --yes github:ProfessionalQwerty/ProjectRuby
 ```
 
 Launch later:

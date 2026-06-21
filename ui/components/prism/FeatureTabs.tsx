@@ -5,9 +5,12 @@ import { Badge } from '../ui/badge'
 import { ButtonColorful } from '../ui/button-colorful'
 import { ModelLogo } from '../ui/ModelLogo'
 
+import { getNpmInstallLabel } from '../../lib/downloads'
+
 interface FeatureTabsProps {
   onExplore: () => void
-  onInstall: () => void
+  onCopyInstall: () => void
+  installCopied?: boolean
 }
 
 const tabs = [
@@ -43,7 +46,7 @@ const tabs = [
   },
 ]
 
-export function FeatureTabs({ onExplore, onInstall }: FeatureTabsProps) {
+export function FeatureTabs({ onExplore, onCopyInstall, installCopied }: FeatureTabsProps) {
   return (
     <section className="py-24">
       <div className="mx-auto max-w-6xl px-6">
@@ -86,7 +89,10 @@ export function FeatureTabs({ onExplore, onInstall }: FeatureTabsProps) {
                   </h3>
                   <p className="leading-relaxed text-neutral-600 lg:text-base">{tab.description}</p>
                   <div className="mt-2 flex flex-wrap gap-3">
-                    <ButtonColorful label="Download App" onClick={onInstall} />
+                    <ButtonColorful
+                      label={installCopied ? 'Copied!' : getNpmInstallLabel()}
+                      onClick={onCopyInstall}
+                    />
                     <button
                       type="button"
                       onClick={onExplore}
