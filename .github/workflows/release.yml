@@ -176,14 +176,6 @@ jobs:
 
 
 
-      - name: Embed PRISM icon in Windows executables
-
-        if: matrix.platform == 'win'
-
-        run: node scripts/embed-exe-icon.js
-
-
-
       - name: Upload release assets
 
         uses: softprops/action-gh-release@v2

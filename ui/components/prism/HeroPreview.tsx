@@ -3,10 +3,10 @@ import { ArrowRight, Check, Sparkles } from 'lucide-react'
 import { ModelLogo } from '../ui/ModelLogo'
 
 const TABS = [
-  { id: 'claude-code', name: 'Claude' },
-  { id: 'openai', name: 'GPT' },
-  { id: 'gemini-cli', name: 'Gemini' },
-  { id: 'local-model', name: 'Local' },
+  { id: 'claude-code', name: 'Claude', intro: 'Picking up the auth refactor where we left off.' },
+  { id: 'openai', name: 'GPT', intro: 'Continuing the API hardening pass.' },
+  { id: 'gemini-cli', name: 'Gemini', intro: 'Resuming the session-store migration.' },
+  { id: 'local-model', name: 'Local', intro: 'Back on the token-budget cleanup.' },
 ]
 
 const CONTEXT_FILES = ['middleware.ts', 'session.ts', 'user-store.ts']
@@ -76,7 +76,8 @@ export function HeroPreview() {
               <ModelLogo provider={model.id} size={22} />
             </span>
             <div className="rounded-2xl rounded-tl-sm bg-neutral-100 px-3.5 py-2.5 text-[13px] leading-relaxed text-neutral-700">
-              Picking up the auth refactor — I already have your repo graph and last session loaded.
+              {model.intro} I already have your repo graph and last session logs loaded from{' '}
+              <span className="font-semibold text-neutral-900">{prev.name}</span>.
             </div>
           </div>
 

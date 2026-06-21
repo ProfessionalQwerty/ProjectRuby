@@ -17,7 +17,10 @@ extraMetadata:
 
 win:
   icon: build/icon.ico
-  signAndEditExecutable: false
+  # Must stay true so electron-builder embeds the PRISM icon into PRISM.exe and
+  # builds a valid NSIS installer. Editing the .exe AFTER build (rcedit) corrupts
+  # the NSIS integrity check -> "integrity check failed" on launch.
+  signAndEditExecutable: true
   target:
     - target: nsis
       arch:
