@@ -16,6 +16,7 @@ extraMetadata:
   main: desktop/dist/main.js
 
 win:
+  icon: build/icon.ico
   signAndEditExecutable: false
   target:
     - target: nsis
@@ -44,6 +45,8 @@ nsis:
   oneClick: false
   allowToChangeInstallationDirectory: true
   createDesktopShortcut: true
+  installerIcon: build/icon.ico
+  uninstallerIcon: build/icon.ico
 
 publish:
   provider: github

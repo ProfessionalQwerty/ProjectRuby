@@ -67,7 +67,12 @@ GitHub Actions builds Windows, macOS, and Linux installers plus portable zip/tar
 |----------|---------|
 | `VITE_API_URL` | Cloud engine URL (Hugging Face Space) |
 | `VITE_PRISM_CLIENT_KEY` | Must match `PRISM_CLIENT_API_KEY` on engine |
+| `VITE_HF_ACCESS_TOKEN` | HF read token — only if engine Space is **private** |
 | `VITE_DOWNLOAD_BASE_URL` | Base URL for direct installer downloads |
+
+## Code signing (Windows)
+
+Apply for free OSS signing at [SignPath Foundation](https://signpath.org/). See [docs/SIGNPATH.md](docs/SIGNPATH.md) for GitHub Actions setup.
 
 ## Structure
 
