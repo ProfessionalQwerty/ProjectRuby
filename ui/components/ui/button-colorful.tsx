@@ -13,18 +13,22 @@ export function ButtonColorful({
 }: ButtonColorfulProps) {
   return (
     <Button
-      className={cn('relative h-11 overflow-hidden px-6', 'group', className)}
+      className={cn(
+        'relative h-11 overflow-hidden border border-neutral-300 bg-white px-6 shadow-md',
+        'group hover:border-neutral-400 hover:shadow-lg',
+        className
+      )}
       {...props}
     >
       <div
         className={cn(
-          'absolute inset-0 bg-gradient-to-r from-violet-500/30 via-fuchsia-500/30 to-amber-500/30',
-          'opacity-60 blur-sm transition-opacity duration-500 group-hover:opacity-90'
+          'absolute inset-0 bg-gradient-to-r from-violet-500 via-fuchsia-500 to-amber-400',
+          'opacity-[0.18] transition-opacity duration-300 group-hover:opacity-[0.28]'
         )}
       />
       <div className="relative flex items-center justify-center gap-2">
-        <span className="font-medium text-neutral-900">{label}</span>
-        <ArrowUpRight className="h-3.5 w-3.5 text-neutral-800" />
+        <span className="font-semibold text-neutral-900">{label}</span>
+        <ArrowUpRight className="h-3.5 w-3.5 text-neutral-700" />
       </div>
     </Button>
   )

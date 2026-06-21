@@ -7,6 +7,7 @@ import { Button } from '../ui/button'
 import { BentoFeatures } from './BentoFeatures'
 import { FeatureTabs } from './FeatureTabs'
 import { InstallCTA } from './InstallCTA'
+import { MemoryGraphShowcase } from './MemoryGraphShowcase'
 import { ModelLogo } from '../ui/ModelLogo'
 import { PrismBrand } from './PrismBrand'
 import { GITHUB_REPO_URL } from '../../lib/app-shell'
@@ -51,10 +52,10 @@ export function LandingPage({ onOpenDemo, onFeaturesDetail, onPrivacy }: Landing
               <Code2 className="h-4 w-4" />
               Open Source App
             </a>
-            <Button variant="ghost" onClick={onOpenDemo} className="gap-1.5 text-[14px]">
-              <Play className="h-4 w-4" />
-              See demo
-            </Button>
+          <Button variant="landingGhost" onClick={onOpenDemo} className="gap-1.5 text-[14px] font-medium">
+            <Play className="h-4 w-4" />
+            See demo
+          </Button>
             <ButtonColorful label={npmLabel} onClick={() => void copy()} />
           </div>
         </div>
@@ -77,7 +78,7 @@ export function LandingPage({ onOpenDemo, onFeaturesDetail, onPrivacy }: Landing
 
         <div className="mt-10 flex flex-col items-center gap-4">
           <InstallCTA copied={copied} onCopy={() => void copy()} />
-          <Button variant="outline" size="lg" onClick={onOpenDemo} className="border-neutral-300 gap-2">
+          <Button variant="landingOutline" size="lg" onClick={onOpenDemo} className="gap-2 font-medium">
             <Play className="h-4 w-4" />
             See PRISM in action
           </Button>
@@ -103,6 +104,7 @@ export function LandingPage({ onOpenDemo, onFeaturesDetail, onPrivacy }: Landing
           installCopied={copied}
         />
       </div>
+      <MemoryGraphShowcase />
       <BentoFeatures />
 
       <section className="border-t border-neutral-200/80 py-24">
@@ -121,7 +123,7 @@ export function LandingPage({ onOpenDemo, onFeaturesDetail, onPrivacy }: Landing
               The PRISM desktop UI is partially open source on GitHub — app shell and workspace
               components only. The intelligence engine is cloud-hosted.
             </p>
-            <Button variant="outline" size="lg" className="mt-6 gap-2 border-neutral-300" asChild>
+            <Button variant="landingOutline" size="lg" className="mt-6 gap-2 font-medium" asChild>
               <a href={GITHUB_APP_URL} target="_blank" rel="noopener noreferrer">
                 <GitHubIcon className="h-4 w-4" />
                 View on GitHub
@@ -135,7 +137,7 @@ export function LandingPage({ onOpenDemo, onFeaturesDetail, onPrivacy }: Landing
         <div className="mx-auto max-w-xl px-6 text-center">
           <h2 className="text-3xl font-semibold text-neutral-900">Ready to build with PRISM?</h2>
           <InstallCTA className="mx-auto mt-8" showAllPlatforms copied={copied} onCopy={() => void copy()} />
-          <Button variant="outline" size="lg" onClick={onOpenDemo} className="mt-6 gap-2">
+          <Button variant="landingOutline" size="lg" onClick={onOpenDemo} className="mt-6 gap-2 font-medium">
             <Play className="h-4 w-4" />
             Watch the demo
           </Button>

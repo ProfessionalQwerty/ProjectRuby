@@ -50,7 +50,7 @@ export function PrismDemoPage({ onBack }: PrismDemoPageProps) {
       <header className="sticky top-0 z-50 border-b border-neutral-200/60 bg-white/70 backdrop-blur-md">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-4">
           <PrismBrand size="nav" />
-          <Button variant="ghost" onClick={onBack} className="gap-2 text-[14px]">
+          <Button variant="landingGhost" onClick={onBack} className="gap-2 text-[14px] font-medium">
             <ArrowLeft className="h-4 w-4" />
             Back
           </Button>

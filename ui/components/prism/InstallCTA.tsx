@@ -58,7 +58,7 @@ export function InstallCTA({ className = '', showAllPlatforms = false, copied, o
       <div className="mt-4 flex max-w-md flex-wrap gap-2">
         <ButtonColorful label={npmLabel} onClick={() => void copy()} />
         {!showAllPlatforms ? (
-          <Button variant="outline" size="lg" className="border-neutral-300" onClick={() => void downloadInstaller()}>
+          <Button variant="landingOutline" size="lg" onClick={() => void downloadInstaller()}>
             <Download className="mr-2 h-4 w-4" />
             {getDownloadButtonLabel()}
           </Button>
@@ -66,9 +66,8 @@ export function InstallCTA({ className = '', showAllPlatforms = false, copied, o
           ALL_PLATFORM_DOWNLOADS.map((p) => (
             <Button
               key={p.id}
-              variant="outline"
+              variant="landingOutline"
               size="sm"
-              className="border-neutral-300"
               onClick={() => void downloadInstaller(p.filename)}
             >
               <Download className="mr-1.5 h-3.5 w-3.5" />
