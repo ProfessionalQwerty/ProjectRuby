@@ -97,7 +97,7 @@ export function LandingPage({ onOpenDemo, onFeaturesDetail, onPrivacy }: Landing
 
         <div className="mx-auto mt-10 w-full max-w-6xl rounded-2xl border border-neutral-200/80 bg-white/75 p-5 text-left shadow-sm backdrop-blur-sm sm:p-6 lg:p-8">
           <InstallCTA
-            layout="horizontal"
+            layout="wide"
             centered={false}
             copied={copied}
             onCopy={() => void copy()}
@@ -123,15 +123,15 @@ export function LandingPage({ onOpenDemo, onFeaturesDetail, onPrivacy }: Landing
       <BentoFeatures />
 
       <section className="border-t border-neutral-200/80 py-24">
-        <div className="mx-auto grid max-w-6xl gap-10 px-6 md:grid-cols-2">
-          <div className="rounded-2xl border border-neutral-200/80 bg-white/70 p-8 backdrop-blur-sm">
+        <div className="mx-auto grid max-w-6xl items-stretch gap-8 px-6 lg:grid-cols-2 lg:gap-10">
+          <div className="flex min-w-0 flex-col rounded-2xl border border-neutral-200/80 bg-white/70 p-6 backdrop-blur-sm sm:p-8">
             <h2 className="text-2xl font-semibold text-neutral-900">Desktop app</h2>
-            <p className="mt-3 text-[15px] leading-relaxed text-neutral-600">
+            <p className="mt-2 text-[15px] leading-relaxed text-neutral-600">
               Install via npm or direct download for Windows, macOS, and Linux.
             </p>
             <InstallCTA
-              className="mt-6"
-              layout="horizontal"
+              className="mt-5 min-w-0"
+              layout="compact"
               centered={false}
               showAllPlatforms
               copied={copied}
@@ -139,13 +139,13 @@ export function LandingPage({ onOpenDemo, onFeaturesDetail, onPrivacy }: Landing
             />
           </div>
 
-          <div className="rounded-2xl border border-neutral-200/80 bg-white/70 p-8 backdrop-blur-sm">
+          <div className="flex min-w-0 flex-col rounded-2xl border border-neutral-200/80 bg-white/70 p-6 backdrop-blur-sm sm:p-8">
             <h2 className="text-2xl font-semibold text-neutral-900">Open source shell</h2>
-            <p className="mt-3 text-[15px] leading-relaxed text-neutral-600">
+            <p className="mt-2 flex-1 text-[15px] leading-relaxed text-neutral-600">
               The PRISM desktop UI is partially open source on GitHub — app shell and workspace
               components only. The intelligence engine is cloud-hosted.
             </p>
-            <Button variant="landingOutline" size="lg" className="mt-6 gap-2 font-medium" asChild>
+            <Button variant="landingOutline" size="lg" className="mt-6 w-fit gap-2 font-medium" asChild>
               <a href={GITHUB_APP_URL} target="_blank" rel="noopener noreferrer">
                 <GitHubIcon className="h-4 w-4" />
                 View on GitHub
@@ -155,18 +155,18 @@ export function LandingPage({ onOpenDemo, onFeaturesDetail, onPrivacy }: Landing
         </div>
       </section>
 
-      <section className="border-t border-neutral-200/80 py-20">
+      <section className="border-t border-neutral-200/80 py-16">
         <div className="mx-auto max-w-6xl px-6">
           <div className="rounded-2xl border border-neutral-200/80 bg-white/75 p-6 shadow-sm backdrop-blur-sm sm:p-8">
-            <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+            <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <h2 className="text-2xl font-semibold text-neutral-900 sm:text-3xl">Ready to build with PRISM?</h2>
-              <Button variant="landingOutline" size="lg" onClick={onOpenDemo} className="shrink-0 gap-2 font-medium">
+              <Button variant="landingOutline" size="default" onClick={onOpenDemo} className="w-fit shrink-0 gap-2 font-medium">
                 <Play className="h-4 w-4" />
                 Watch the demo
               </Button>
             </div>
             <InstallCTA
-              layout="horizontal"
+              layout="wide"
               centered={false}
               showAllPlatforms
               copied={copied}
