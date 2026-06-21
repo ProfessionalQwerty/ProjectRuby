@@ -11,7 +11,7 @@ The **intelligence engine** (graph indexing, orchestration, datalog) is propriet
 | **Website** | `prism-app/` root | Vercel |
 | **Open source** | `prism-app/` | GitHub `ProfessionalQwerty/ProjectRuby` |
 | **Desktop installers** | GitHub Releases | Built by `.github/workflows/release.yml` |
-| **npm installer** | `installer/` (`@prism/install`) | npm registry |
+| **npm installer** | `scripts/install-prism.mjs` | via `npx github:ProfessionalQwerty/ProjectRuby` |
 
 Before pushing to GitHub, run:
 
@@ -41,28 +41,7 @@ Requires Node.js 18+. Downloads PRISM from GitHub Releases and creates a desktop
 npx --yes github:ProfessionalQwerty/ProjectRuby
 ```
 
-Launch later:
-
-```bash
-npx @prism/install --launch
-# or, if installed globally:
-prism
-```
-
-**First launch trust prompts**
-
-- **Windows SmartScreen:** More info → Run anyway
-- **macOS Gatekeeper:** Right-click the app → Open
-
-## Direct installer download
-
-| Platform | File |
-|----------|------|
-| Windows | `PRISM-Setup-x64.exe` |
-| macOS | `PRISM-mac-x64.dmg` |
-| Linux | `PRISM-linux-x64.AppImage` |
-
-Portable archives for the npm installer: `PRISM-Setup-x64.zip`, `PRISM-mac-x64.zip`, `PRISM-linux-x64.tar.gz`.
+Launch later from your desktop shortcut, or run the installed PRISM executable directly.
 
 ## Build desktop installer locally
 
@@ -80,14 +59,7 @@ git tag v0.1.1
 git push origin v0.1.1
 ```
 
-GitHub Actions builds Windows, macOS, and Linux installers plus portable zip/tar archives.
-
-Publish npm installer after release:
-
-```powershell
-npm run build -w installer
-npm publish -w installer --access public
-```
+GitHub Actions builds Windows, macOS, and Linux installers plus portable zip/tar archives used by the npm install script.
 
 ## Environment variables (UI)
 
@@ -103,7 +75,7 @@ npm publish -w installer --access public
 prism-app/
 ├── ui/           React workspace + marketing site
 ├── desktop/      Electron main/preload
-├── installer/    @prism/install npm package
+├── scripts/      install-prism.mjs (npx entry)
 ├── build/        App icons for electron-builder
 └── release/      Built installers (gitignored)
 ```
