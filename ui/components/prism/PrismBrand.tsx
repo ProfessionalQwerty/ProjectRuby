@@ -1,4 +1,5 @@
 import React from 'react'
+import { assetUrl } from '../../lib/asset-url'
 
 type PrismBrandSize = 'nav' | 'hero' | 'footer'
 
@@ -32,6 +33,8 @@ const sizeConfig: Record<
   },
 }
 
+const LOGO_SRC = assetUrl('prism-logo.png')
+
 export function PrismBrand({ size = 'nav', showText = true, className = '' }: PrismBrandProps) {
   const cfg = sizeConfig[size]
 
@@ -39,9 +42,16 @@ export function PrismBrand({ size = 'nav', showText = true, className = '' }: Pr
     <div className={`inline-flex items-center justify-center ${cfg.gap} ${className}`}>
       <div className={`relative shrink-0 ${cfg.box}`}>
         <img
-          src="/prism-logo.png"
+          src={LOGO_SRC}
           alt="PRISM"
           className={`absolute left-1/2 top-1/2 h-full w-full max-w-none -translate-x-1/2 -translate-y-1/2 object-contain ${cfg.scale} drop-shadow-lg`}
+          onError={(e) => {
+            const img = e.currentTarget
+            if (!img.dataset.fallback) {
+              img.dataset.fallback = '1'
+              img.src = assetUrl('prism-logo.svg')
+            }
+          }}
         />
       </div>
       {showText && (

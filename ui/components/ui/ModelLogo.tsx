@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { cn } from '../../lib/utils'
+import { assetUrl } from '../../lib/asset-url'
 import type { ModelProviderId } from '../../lib/models'
 
 interface ModelLogoProps {
@@ -9,15 +10,15 @@ interface ModelLogoProps {
 }
 
 const LOGO_SRC: Partial<Record<ModelProviderId, string>> = {
-  openai: '/ailogos/CHATGPTLOGO.png',
-  codex: '/ailogos/CHATGPTLOGO.png',
-  'claude-code': '/ailogos/CLAUDELOGO.webp',
-  'gemini-cli': '/ailogos/GEMINILOGO.jpg',
-  deepseek: '/ailogos/deepseeklogo.png',
-  mistral: '/ailogos/MistralLogo.png',
-  grok: '/ailogos/groklogo.png',
-  qwen: '/ailogos/qwenlogo.jpg',
-  'local-model': '/ailogos/OLLAMALOGO.png',
+  openai: assetUrl('ailogos/CHATGPTLOGO.png'),
+  codex: assetUrl('ailogos/CHATGPTLOGO.png'),
+  'claude-code': assetUrl('ailogos/CLAUDELOGO.webp'),
+  'gemini-cli': assetUrl('ailogos/GEMINILOGO.jpg'),
+  deepseek: assetUrl('ailogos/deepseeklogo.png'),
+  mistral: assetUrl('ailogos/MistralLogo.png'),
+  grok: assetUrl('ailogos/groklogo.png'),
+  qwen: assetUrl('ailogos/qwenlogo.jpg'),
+  'local-model': assetUrl('ailogos/OLLAMALOGO.png'),
 }
 
 export function ModelLogo({ provider, className, size = 18 }: ModelLogoProps) {

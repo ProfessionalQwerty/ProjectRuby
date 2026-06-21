@@ -9,6 +9,7 @@ const isDev = !app.isPackaged && process.env.ELECTRON_DEV === '1'
 function resolveAppIcon(): Electron.NativeImage | undefined {
   const candidates = [
     join(app.getAppPath(), 'build/icon.png'),
+    join(app.getAppPath(), 'ui/dist/prism-logo.png'),
     join(__dirname, '../../build/icon.png'),
   ]
   for (const iconPath of candidates) {

@@ -1,9 +1,9 @@
 /**
- * Generate electron-builder icons from prism-logo or cut-stone source PNG.
+ * Generate electron-builder icons from prism-logo SVG/PNG.
  * Trims transparent padding and fills the frame so taskbar/desktop icons match other apps.
  * Run: npm run generate-icons
  */
-const { mkdir, readFile, writeFile } = require('fs/promises')
+const { mkdir, readFile, writeFile, copyFile } = require('fs/promises')
 const { existsSync } = require('fs')
 const { join } = require('path')
 const sharp = require('sharp')
@@ -11,10 +11,12 @@ const pngToIco = require('png-to-ico')
 
 const root = join(__dirname, '..')
 const buildDir = join(root, 'build')
+const publicDir = join(root, 'ui', 'public')
 
 const SOURCE_CANDIDATES = [
   join(root, '..', 'prism_logo_cut_stone_final.png'),
-  join(root, 'ui', 'public', 'prism-logo.png'),
+  join(publicDir, 'prism-logo.png'),
+  join(publicDir, 'prism-logo.svg'),
 ]
 
 async function findSource() {
@@ -24,7 +26,6 @@ async function findSource() {
   throw new Error(`No source logo found. Expected one of:\n${SOURCE_CANDIDATES.join('\n')}`)
 }
 
-/** Trim alpha padding, then composite logo at ~92% of canvas (Windows/macOS expect full-bleed icons). */
 async function renderIconCanvas(sourceBuffer, size) {
   const trimmed = await sharp(sourceBuffer).trim().toBuffer()
   const logoSize = Math.round(size * 0.92)
@@ -45,6 +46,7 @@ async function renderIconCanvas(sourceBuffer, size) {
 
 async function main() {
   await mkdir(buildDir, { recursive: true })
+  await mkdir(publicDir, { recursive: true })
   const sourcePath = await findSource()
   console.log('Using source:', sourcePath)
 
@@ -55,16 +57,16 @@ async function main() {
 
   await writeFile(join(buildDir, 'icon.png'), icon512)
   await writeFile(join(buildDir, 'icon@2x.png'), icon1024)
+  await writeFile(join(publicDir, 'prism-logo.png'), icon512)
 
   const icoSizes = [16, 24, 32, 48, 64, 128, 256]
   const icoBuffers = await Promise.all(icoSizes.map((s) => renderIconCanvas(source, s)))
   const ico = await pngToIco(icoBuffers)
   await writeFile(join(buildDir, 'icon.ico'), ico)
 
-  // macOS electron-builder reads icon.png; keep 256 for window icon fallback
   await writeFile(join(buildDir, 'icon-256.png'), icon256)
 
-  console.log('Wrote build/icon.png (512), build/icon@2x.png (1024), build/icon.ico')
+  console.log('Wrote build/icon.png, build/icon.ico, ui/public/prism-logo.png')
 }
 
 main().catch((err) => {

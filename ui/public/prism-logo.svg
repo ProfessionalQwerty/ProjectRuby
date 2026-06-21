@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+  <defs>
+    <linearGradient id="prism-a" x1="80" y1="48" x2="432" y2="464" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#8B5CF6"/>
+      <stop offset="0.5" stop-color="#A855F7"/>
+      <stop offset="1" stop-color="#6366F1"/>
+    </linearGradient>
+    <linearGradient id="prism-b" x1="256" y1="48" x2="256" y2="464" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#7C3AED"/>
+      <stop offset="1" stop-color="#4F46E5"/>
+    </linearGradient>
+    <linearGradient id="prism-c" x1="368" y1="120" x2="144" y2="360" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#DDD6FE"/>
+      <stop offset="1" stop-color="#C4B5FD"/>
+    </linearGradient>
+  </defs>
+  <polygon points="256,56 448,208 256,456 64,208" fill="url(#prism-a)"/>
+  <polygon points="256,56 256,456 160,208" fill="url(#prism-b)" opacity="0.85"/>
+  <polygon points="256,56 448,208 352,208" fill="url(#prism-c)" opacity="0.75"/>
+  <polygon points="256,208 448,208 256,456" fill="#5B21B6" opacity="0.25"/>
+</svg>
