@@ -81,10 +81,10 @@ export function LandingPage({ onOpenDemo, onFeaturesDetail, onPrivacy }: Landing
       </nav>
 
       <section className="mx-auto max-w-6xl px-6 pb-20 pt-16 text-center">
-        <div className="mx-auto mb-8 flex justify-center">
+        <div className="mx-auto mb-6 flex justify-center">
           <PrismBrand size="hero" showText={false} />
         </div>
-        <p className="mb-5 text-[12px] font-semibold uppercase tracking-[0.25em] text-neutral-500">
+        <p className="mb-5 text-sm font-bold uppercase tracking-[0.32em] text-neutral-600 md:text-base md:tracking-[0.36em]">
           Agentic Development Environment
         </p>
         <h1 className="mx-auto max-w-4xl text-4xl font-semibold tracking-tight text-neutral-900 md:text-6xl md:leading-[1.08]">

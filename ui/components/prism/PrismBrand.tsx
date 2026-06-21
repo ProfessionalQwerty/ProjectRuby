@@ -20,8 +20,8 @@ const sizeConfig: Record<
     gap: 'gap-3.5',
   },
   hero: {
-    box: 'h-56 w-56 md:h-72 md:w-72',
-    scale: 'scale-[1.45]',
+    box: 'h-32 w-32 md:h-40 md:w-40',
+    scale: 'scale-[1.2]',
     text: 'text-5xl md:text-6xl font-bold tracking-[0.14em]',
     gap: 'gap-0',
   },
