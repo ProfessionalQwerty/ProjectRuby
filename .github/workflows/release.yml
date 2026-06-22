@@ -35,7 +35,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
           cache-dependency-path: package-lock.json
 
@@ -46,6 +46,7 @@ jobs:
         run: npm run generate-icons
 
       - name: Verify cloud build secrets
+        shell: bash
         run: |
           if [ -z "$VITE_HF_ACCESS_TOKEN" ]; then
             echo "::warning::VITE_HF_ACCESS_TOKEN is empty — private Hugging Face Spaces will return 404 to the desktop app."
