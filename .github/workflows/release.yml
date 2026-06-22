@@ -1,189 +1,118 @@
 name: Release Desktop App
 
-
-
 on:
-
   push:
-
     tags:
-
       - 'v*'
 
-
-
 permissions:
-
   contents: write
-
   actions: read
 
-
-
 jobs:
-
   build:
-
     strategy:
-
       fail-fast: false
-
       matrix:
-
         include:
-
           - os: windows-latest
-
             platform: win
-
+            artifact: release-win
           - os: macos-latest
-
             platform: mac
-
+            artifact: release-mac
           - os: ubuntu-latest
-
             platform: linux
-
-
+            artifact: release-linux
 
     runs-on: ${{ matrix.os }}
 
-
-
     env:
-
       SIGNPATH_API_TOKEN: ${{ secrets.SIGNPATH_API_TOKEN }}
 
-
-
     steps:
-
       - uses: actions/checkout@v4
 
-
-
       - uses: actions/setup-node@v4
-
         with:
-
           node-version: 20
-
           cache: npm
-
           cache-dependency-path: package-lock.json
 
-
-
       - name: Install dependencies
-
         run: npm ci
 
-
-
       - name: Generate app icons
-
         run: npm run generate-icons
 
-
-
       - name: Build UI and desktop
-
         run: npm run build:electron
-
         env:
-
           VITE_ELECTRON: '1'
-
           VITE_API_URL: https://yashshshsh-prism.hf.space
-
           VITE_PRISM_CLIENT_KEY: ${{ secrets.VITE_PRISM_CLIENT_KEY }}
           VITE_HF_ACCESS_TOKEN: ${{ secrets.VITE_HF_ACCESS_TOKEN }}
-
           VITE_DOWNLOAD_BASE_URL: ${{ secrets.VITE_DOWNLOAD_BASE_URL }}
 
-
-
       - name: Build installers
-
         run: npm run dist
-
         env:
-
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
           CSC_IDENTITY_AUTO_DISCOVERY: false
 
-
-
       - name: Upload unsigned Windows installer for SignPath
-
         if: matrix.platform == 'win'
-
         id: upload_unsigned
-
         uses: actions/upload-artifact@v4
-
         with:
-
           name: windows-installer-unsigned
-
           path: release/PRISM-Setup-x64.exe
-
           if-no-files-found: error
 
-
-
       - name: Sign Windows installer via SignPath Foundation
-
         if: matrix.platform == 'win' && env.SIGNPATH_API_TOKEN != ''
-
         uses: signpath/github-action-submit-signing-request@v1
-
         with:
-
           api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
-
           organization-id: ${{ secrets.SIGNPATH_ORGANIZATION_ID }}
-
           project-slug: ${{ secrets.SIGNPATH_PROJECT_SLUG }}
-
           signing-policy-slug: ${{ secrets.SIGNPATH_SIGNING_POLICY_SLUG }}
-
           artifact-configuration-slug: ${{ secrets.SIGNPATH_ARTIFACT_CONFIG_SLUG }}
-
           github-artifact-id: ${{ steps.upload_unsigned.outputs.artifact-id }}
-
           wait-for-completion: true
-
           output-artifact-directory: signed-installer
 
-
-
       - name: Replace with signed Windows installer
-
         if: matrix.platform == 'win' && env.SIGNPATH_API_TOKEN != ''
-
         shell: pwsh
-
         run: |
-
           $signed = Get-ChildItem -Path signed-installer -Filter *.exe -Recurse | Select-Object -First 1
-
           if (-not $signed) { throw "SignPath did not return a signed .exe" }
-
           Copy-Item -Force $signed.FullName release/PRISM-Setup-x64.exe
-
           Write-Host "Using signed installer from SignPath"
 
-
-
-      - name: Upload release assets
-
-        uses: softprops/action-gh-release@v2
-
+      - name: Upload platform release files
+        uses: actions/upload-artifact@v4
         with:
+          name: ${{ matrix.artifact }}
+          path: release/*
+          if-no-files-found: error
 
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: release-*
+          path: release
+          merge-multiple: true
+
+      - name: List release files
+        run: ls -la release/
+
+      - name: Publish GitHub Release (all platforms at once)
+        uses: softprops/action-gh-release@v2
+        with:
           files: release/*
-
           generate_release_notes: true
-

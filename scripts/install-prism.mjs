@@ -83,9 +83,36 @@ function pickPortableAsset(assets, platform) {
   const match = matcher && assets.find((a) => matcher(a.name))
   if (match) return match
 
+  return null
+}
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms))
+}
+
+/** CI uploads mac/linux before Windows finishes — retry until our platform asset appears. */
+async function fetchReleaseWithAsset(repo, platform, { maxAttempts = 18, delayMs = 10_000 } = {}) {
+  let lastTag = 'unknown'
+  let lastAssets = []
+
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    const { tag, assets } = await fetchLatestRelease(repo)
+    lastTag = tag
+    lastAssets = assets
+    const asset = pickPortableAsset(assets, platform)
+    if (asset) return { tag, asset }
+
+    if (attempt < maxAttempts) {
+      console.log(
+        `Waiting for ${platform.portableFilename} on ${tag} (${attempt}/${maxAttempts}) — Windows builds often finish last…`
+      )
+      await sleep(delayMs)
+    }
+  }
+
   throw new Error(
     `No ${platform.label} package found in the latest release (expected ${platform.portableFilename}). ` +
-      `Available: ${assets.map((a) => a.name).join(', ') || 'none'}`
+      `Available: ${lastAssets.map((a) => a.name).join(', ') || 'none'}`
   )
 }
 
@@ -212,9 +239,8 @@ async function installPrism(options = {}) {
   const platform = detectPlatform()
   console.log(`Installing PRISM for ${platform.label}...`)
 
-  const { tag, assets } = await fetchLatestRelease(options.repo)
+  const { tag, asset } = await fetchReleaseWithAsset(options.repo, platform)
   console.log(`Latest release: ${tag}`)
-  const asset = pickPortableAsset(assets, platform)
   console.log(`Downloading ${asset.name}...`)
 
   const tempDir = await mkdtemp(join(tmpdir(), 'prism-install-'))
