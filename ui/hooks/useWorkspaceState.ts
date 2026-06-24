@@ -320,10 +320,11 @@ export function useWorkspaceState() {
       setUserAgentIds(stored)
       setApiOnline(true)
       await refreshWorkspaceData()
+      await refreshAgents()
     } catch {
       // Project open failed — engine may still be online
     }
-  }, [refreshProjects, loadTabsForAgent, loadAgentSessions, refreshWorkspaceData])
+  }, [refreshProjects, loadTabsForAgent, loadAgentSessions, refreshWorkspaceData, refreshAgents])
 
   const connectProject = useCallback(
     async (repoPath: string, name?: string) => {
@@ -608,6 +609,19 @@ export function useWorkspaceState() {
         return
       }
 
+      const registered = registeredAgents.find((a) => a.agentId === activeAgentId)
+      if (registered && !registered.connected) {
+        setMessages((m) => [
+          ...m,
+          {
+            id: `err-${Date.now()}`,
+            role: 'agent',
+            content: `${getCatalogEntry(activeAgentId)?.name || activeAgentId} is not connected. Open the + menu and add your API key.`,
+          },
+        ])
+        return
+      }
+
       setPrompt('')
       setIsRunning(true)
       const activeSession = sessionId || crypto.randomUUID()
@@ -677,11 +691,11 @@ export function useWorkspaceState() {
     },
     [
       activeAgentId,
-      activeProjectId,
       isRunning,
       loadAgentSessions,
       prompt,
       refreshWorkspaceData,
+      registeredAgents,
       sessionId,
     ]
   )
