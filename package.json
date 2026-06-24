@@ -1,6 +1,6 @@
 {
   "name": "prism-app",
-  "version": "0.2.5",
+  "version": "0.2.6",
   "private": true,
   "description": "PRISM open-source desktop shell and web UI",
   "main": "desktop/dist/main.js",
@@ -34,6 +34,7 @@
     "wait-on": "^8.0.1"
   },
   "dependencies": {
+    "electron-updater": "^6.8.9",
     "extract-zip": "^2.0.1",
     "tar": "^7.4.3"
   }

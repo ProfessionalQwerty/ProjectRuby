@@ -6,9 +6,11 @@ import {
   FileLock2,
   GitBranch,
   History,
+  Layers,
   Play,
   Repeat,
   Rocket,
+  ScrollText,
   Terminal,
   Globe,
   Zap,
@@ -45,6 +47,21 @@ const PILLARS = [
     icon: Zap,
     title: 'Warm starts',
     body: 'New chats inherit context. Stop re-explaining your codebase.',
+  },
+]
+
+const POSITIONING = [
+  {
+    icon: Layers,
+    title: 'Model-agnostic by design',
+    body:
+      'PRISM is not a model provider — it is the environment models run inside. You work with Claude, GPT, Gemini, and local models in one place without betting on any single vendor. That independence is the moat: no provider can replace what PRISM remembers about your project.',
+  },
+  {
+    icon: ScrollText,
+    title: 'Your architectural log — not theirs',
+    body:
+      'After six months in PRISM, every decision, build, failure, fix, and architectural choice lives in your project graph and execution ledger — not in Claude’s memory or GPT’s context window. Each agent run is documented: what changed, why, and which files were touched.',
   },
 ]
 
@@ -135,8 +152,8 @@ export function LandingPage({ onOpenDemo, onFeaturesDetail, onPrivacy }: Landing
             </span>
           </h1>
           <p className="mx-auto mt-5 max-w-md text-[17px] leading-relaxed text-neutral-600 lg:mx-0">
-            PRISM is a desktop workspace that remembers your codebase across every model — so you never
-            re-explain your project again.
+            PRISM is the agentic development environment models run inside — model-agnostic, with a
+            persistent architectural memory that belongs to your project, not to any single AI provider.
           </p>
 
           <div className="mt-8">
@@ -170,6 +187,39 @@ export function LandingPage({ onOpenDemo, onFeaturesDetail, onPrivacy }: Landing
             </div>
           ))}
         </div>
+      </section>
+
+      {/* POSITIONING — model agnostic + architectural memory */}
+      <section className="mx-auto max-w-6xl px-6 pb-12">
+        <div className="mb-8 text-center lg:text-left">
+          <p className="text-sm font-bold uppercase tracking-[0.28em] text-violet-600">Why PRISM</p>
+          <h2 className="mt-3 text-2xl font-semibold text-neutral-900 sm:text-3xl">
+            The environment — not another model
+          </h2>
+          <p className="mx-auto mt-3 max-w-2xl text-[15px] leading-relaxed text-neutral-600 lg:mx-0">
+            You are not competing with OpenAI, Anthropic, or Google. PRISM is where all of them work on
+            the same codebase, with the same history, under your control.
+          </p>
+        </div>
+        <div className="grid gap-6 lg:grid-cols-2">
+          {POSITIONING.map((item) => (
+            <div
+              key={item.title}
+              className="rounded-2xl border border-neutral-200/80 bg-white/80 p-7 backdrop-blur-sm"
+            >
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500/15 to-fuchsia-500/10">
+                <item.icon className="h-5 w-5 text-violet-600" />
+              </div>
+              <h3 className="mt-4 text-[18px] font-semibold text-neutral-900">{item.title}</h3>
+              <p className="mt-2 text-[14px] leading-relaxed text-neutral-600">{item.body}</p>
+            </div>
+          ))}
+        </div>
+        <p className="mt-6 text-center text-[13px] leading-relaxed text-neutral-500 lg:text-left">
+          Every agent session writes to the execution ledger and datalog — summaries, file changes, and
+          reasoning — so the next model (or the same one weeks later) picks up a well-maintained record
+          of how your software was actually built.
+        </p>
       </section>
 
       {/* VISUAL PROOF — compact memory graph */}

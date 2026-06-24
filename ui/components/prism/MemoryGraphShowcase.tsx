@@ -222,8 +222,9 @@ export function MemoryGraphShowcase({ variant = 'full' }: { variant?: 'full' | '
             One memory. Every model.
           </h2>
           <p className="mx-auto mt-4 max-w-xl text-[15px] leading-relaxed text-neutral-600">
-            PRISM maps your codebase into a living graph and shared datalog — so the next chat, on any model,
-            starts warm.
+            Six months in PRISM, and the graph of every decision, build, and fix is yours — not locked in
+            Claude’s or GPT’s session memory. Agents document each change in the ledger so the next model
+            inherits a complete architectural record.
           </p>
         </div>
 
