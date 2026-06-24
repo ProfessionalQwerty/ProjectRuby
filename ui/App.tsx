@@ -4,7 +4,9 @@ import { FeaturesDetailPage } from './components/prism/FeaturesDetailPage'
 import { PrismDemoPage } from './components/prism/PrismDemoPage'
 import { PrivacyPolicyPage } from './components/prism/PrivacyPolicyPage'
 import { WorkspaceShell } from './components/prism/WorkspaceShell'
+import { SignInGate } from './components/prism/SignInGate'
 import { isDesktopApp } from './lib/desktop-bridge'
+import { getGitHubUser, isGitHubSignedIn, type GitHubUser } from './lib/github-auth'
 
 export type PrismView = 'landing' | 'demo' | 'features' | 'privacy' | 'workspace'
 
@@ -25,6 +27,9 @@ function navigate(view: PrismView) {
 
 const App: React.FC = () => {
   const [view, setView] = useState<PrismView>(viewFromHash)
+  const [githubUser, setGithubUser] = useState<GitHubUser | null>(() =>
+    isDesktopApp() && isGitHubSignedIn() ? getGitHubUser() : null
+  )
 
   useEffect(() => {
     const onHashChange = () => setView(viewFromHash())
@@ -43,6 +48,10 @@ const App: React.FC = () => {
     navigate(next)
     setView(next)
   }, [])
+
+  if (isDesktopApp() && !githubUser) {
+    return <SignInGate onSignedIn={setGithubUser} />
+  }
 
   switch (view) {
     case 'workspace':

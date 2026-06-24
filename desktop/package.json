@@ -1,6 +1,6 @@
 {
   "name": "prism-desktop",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "private": true,
   "main": "dist/main.js",
   "scripts": {
@@ -9,7 +9,8 @@
     "start": "electron ."
   },
   "dependencies": {
-    "electron": "^33.4.0"
+    "electron": "^33.4.0",
+    "electron-updater": "^6.8.9"
   },
   "devDependencies": {
     "@types/node": "^20.11.0",

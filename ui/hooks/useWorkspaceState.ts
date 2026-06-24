@@ -17,6 +17,11 @@ import {
   type ChatTab,
 } from '../lib/chat-tabs'
 import type { ChatMessage } from '../lib/chat-types'
+import {
+  mergeSessionsForAgent,
+  markSessionDeleted,
+  upsertArchivedSession,
+} from '../lib/session-store'
 
 export interface Project {
   id: string
@@ -121,6 +126,8 @@ export function useWorkspaceState() {
   const [repoFiles, setRepoFiles] = useState<string[]>([])
   const [ledgerEntries, setLedgerEntries] = useState<LedgerEntry[]>([])
   const [agentSessions, setAgentSessions] = useState<AgentSession[]>([])
+  const [sessionsByAgent, setSessionsByAgent] = useState<Record<string, AgentSession[]>>({})
+  const [sessionsRevision, setSessionsRevision] = useState(0)
 
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [prompt, setPrompt] = useState('')
@@ -277,18 +284,19 @@ export function useWorkspaceState() {
       const res = await apiClient.get<{
         success: boolean
         sessions: AgentSession[]
-      }>(`/api/agents/${agentId}/history?limit=30`)
-      setAgentSessions(
-        (res.sessions || []).map((s) => ({
-          ...s,
-          timestamp:
-            typeof s.timestamp === 'string' ? s.timestamp : new Date(s.timestamp).toISOString(),
-        }))
-      )
+      }>(`/api/agents/${agentId}/history?limit=50`)
+      const mapped = (res.sessions || []).map((s) => ({
+        ...s,
+        timestamp:
+          typeof s.timestamp === 'string' ? s.timestamp : new Date(s.timestamp).toISOString(),
+      }))
+      setSessionsByAgent((prev) => ({ ...prev, [agentId]: mapped }))
+      if (agentId === activeAgentId) setAgentSessions(mapped)
     } catch {
-      setAgentSessions([])
+      setSessionsByAgent((prev) => ({ ...prev, [agentId]: [] }))
+      if (agentId === activeAgentId) setAgentSessions([])
     }
-  }, [])
+  }, [activeAgentId])
 
   const openProject = useCallback(async (projectId: string, projectList?: Project[]) => {
     try {
@@ -386,6 +394,15 @@ export function useWorkspaceState() {
         setMessages(loaded)
         setSessionId(sid)
         setActiveSessionId(sid)
+        if (activeAgentId) {
+          upsertArchivedSession(activeProjectId, activeAgentId, {
+            sessionId: sid,
+            query: tab.title,
+            timestamp: tab.updatedAt,
+            status: 'success',
+          })
+          setSessionsRevision((v) => v + 1)
+        }
       } catch {
         // Session load failed — keep engine online
       }
@@ -660,6 +677,13 @@ export function useWorkspaceState() {
 
         setSessionId(response.result.sessionId)
         setActiveSessionId(response.result.sessionId)
+        upsertArchivedSession(activeProjectId, activeAgentId, {
+          sessionId: response.result.sessionId,
+          query,
+          timestamp: new Date().toISOString(),
+          status: 'success',
+        })
+        setSessionsRevision((v) => v + 1)
         setMessages((current) => [
           ...current.filter((m) => m.detail !== 'pending'),
           {
@@ -708,25 +732,41 @@ export function useWorkspaceState() {
     [runPrompt]
   )
 
-  const displaySessions = useMemo((): AgentSession[] => {
-    const byId = new Map<string, AgentSession>()
-    for (const session of agentSessions) {
-      byId.set(session.sessionId, session)
-    }
-    for (const tab of chatTabs) {
-      if (!byId.has(tab.sessionId)) {
-        byId.set(tab.sessionId, {
-          sessionId: tab.sessionId,
-          query: tab.title,
-          timestamp: tab.updatedAt,
-          status: tab.messages.length > 0 ? 'local' : 'draft',
-        })
-      }
-    }
-    return Array.from(byId.values()).sort(
-      (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-    )
-  }, [agentSessions, chatTabs])
+  const getSessionsForAgent = useCallback(
+    (agentId: string): AgentSession[] => {
+      void sessionsRevision
+      return mergeSessionsForAgent(activeProjectId, agentId, sessionsByAgent[agentId] || [])
+    },
+    [activeProjectId, sessionsByAgent, sessionsRevision]
+  )
+
+  const deleteSession = useCallback(
+    (agentId: string, sessionId: string) => {
+      markSessionDeleted(activeProjectId, agentId, sessionId)
+      setSessionsRevision((v) => v + 1)
+      setChatTabs((prev) => {
+        const next = prev.filter((t) => t.sessionId !== sessionId)
+        if (next.length === 0 && activeAgentId === agentId) {
+          const fresh = createChatTab()
+          setActiveChatTabId(fresh.id)
+          setMessages([])
+          setSessionId(fresh.sessionId)
+          setActiveSessionId(fresh.sessionId)
+          return [fresh]
+        }
+        if (activeChatTabIdRef.current && prev.find((t) => t.id === activeChatTabIdRef.current)?.sessionId === sessionId) {
+          const tab = next[next.length - 1] || createChatTab()
+          setActiveChatTabId(tab.id)
+          setMessages(tab.messages)
+          setSessionId(tab.sessionId)
+          setActiveSessionId(tab.sessionId)
+        }
+        if (activeAgentId) saveChatTabs(activeProjectId, activeAgentId, next.length ? next : [createChatTab()])
+        return next.length ? next : [createChatTab()]
+      })
+    },
+    [activeAgentId, activeProjectId]
+  )
 
   return {
     apiOnline,
@@ -750,7 +790,10 @@ export function useWorkspaceState() {
     saveVision,
     repoFiles,
     ledgerEntries,
-    agentSessions: displaySessions,
+    agentSessions,
+    getSessionsForAgent,
+    loadAgentSessions,
+    deleteSession,
     activeSessionId,
     loadSession,
     chatTabs: chatTabs.map((t) => ({ id: t.id, sessionId: t.sessionId, title: t.title })),

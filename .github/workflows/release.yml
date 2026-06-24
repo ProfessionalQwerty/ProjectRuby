@@ -89,11 +89,13 @@ jobs:
             echo "VITE_PRISM_CLIENT_KEY=${VITE_PRISM_CLIENT_KEY}"
             echo "VITE_HF_ACCESS_TOKEN=${VITE_HF_ACCESS_TOKEN}"
             echo "VITE_DOWNLOAD_BASE_URL=${VITE_DOWNLOAD_BASE_URL}"
+            echo "VITE_GITHUB_CLIENT_ID=${VITE_GITHUB_CLIENT_ID}"
           } > ui/.env.production.local
         env:
           VITE_PRISM_CLIENT_KEY: ${{ secrets.VITE_PRISM_CLIENT_KEY }}
           VITE_HF_ACCESS_TOKEN: ${{ secrets.VITE_HF_ACCESS_TOKEN }}
           VITE_DOWNLOAD_BASE_URL: ${{ secrets.VITE_DOWNLOAD_BASE_URL }}
+          VITE_GITHUB_CLIENT_ID: ${{ secrets.VITE_GITHUB_CLIENT_ID }}
 
       - name: Install Linux packaging dependencies
         if: matrix.platform == 'linux'
@@ -109,6 +111,7 @@ jobs:
           VITE_PRISM_CLIENT_KEY: ${{ secrets.VITE_PRISM_CLIENT_KEY }}
           VITE_HF_ACCESS_TOKEN: ${{ secrets.VITE_HF_ACCESS_TOKEN }}
           VITE_DOWNLOAD_BASE_URL: ${{ secrets.VITE_DOWNLOAD_BASE_URL }}
+          VITE_GITHUB_CLIENT_ID: ${{ secrets.VITE_GITHUB_CLIENT_ID }}
 
       - name: Build installers
         if: matrix.platform == 'linux'
@@ -174,6 +177,14 @@ jobs:
 
       - name: List release files
         run: ls -la release/
+
+      - name: Verify auto-update metadata
+        shell: bash
+        run: |
+          if [ ! -f release/latest.yml ] && [ ! -f release/latest-mac.yml ] && [ ! -f release/latest-linux.yml ]; then
+            echo "::warning::latest.yml not found — in-app auto-update may not work until electron-builder publish metadata is present"
+            ls -la release/ || true
+          fi
 
       - name: Publish GitHub Release (all platforms at once)
         uses: softprops/action-gh-release@v2

@@ -17,6 +17,12 @@ export function WorkspaceShell() {
   const connections = useConnections(ws.apiOnline && Boolean(ws.activeProject))
   const { dark, toggle } = useTheme()
   const [connectOpen, setConnectOpen] = useState(false)
+  const [sessionsAgentId, setSessionsAgentId] = useState<string | null>(null)
+
+  const viewSessionsAgentId = sessionsAgentId || ws.activeAgentId
+  const sessionsForView = viewSessionsAgentId
+    ? ws.getSessionsForAgent(viewSessionsAgentId)
+    : []
 
   if (!ws.activeProject) {
     return (
@@ -87,11 +93,25 @@ export function WorkspaceShell() {
         <RightPanel
           apiOnline={ws.apiOnline}
           ledgerEntries={ws.ledgerEntries}
-          agentSessions={ws.agentSessions}
-          activeAgentId={ws.activeAgentId}
+          projectModels={ws.projectModels}
+          sessionsAgentId={viewSessionsAgentId}
+          onSessionsAgentChange={setSessionsAgentId}
+          sessions={sessionsForView}
+          onLoadSessionsForAgent={ws.loadAgentSessions}
           activeSessionId={ws.activeSessionId}
-          onSelectSession={(id) => void ws.loadSession(id)}
-          onNewChat={ws.startNewChat}
+          onSelectSession={(id) => {
+            if (viewSessionsAgentId && viewSessionsAgentId !== ws.activeAgentId) {
+              ws.selectAgent(viewSessionsAgentId)
+            }
+            void ws.loadSession(id)
+          }}
+          onDeleteSession={ws.deleteSession}
+          onNewChat={() => {
+            if (viewSessionsAgentId && viewSessionsAgentId !== ws.activeAgentId) {
+              ws.selectAgent(viewSessionsAgentId)
+            }
+            ws.startNewChat()
+          }}
           connections={connections}
         />
       </div>

@@ -1,34 +1,50 @@
 import { getDesktopAPI } from './desktop-bridge'
 
-export type AppUpdateInfo = {
+export type AppUpdateStatus = {
+  phase: string
   currentVersion: string
   latestVersion: string | null
-  updateAvailable: boolean
-  downloadUrl: string | null
-  releaseUrl: string | null
-  error?: string
+  percent: number | null
+  message: string | null
+  error: string | null
 }
 
-export async function checkForAppUpdate(): Promise<AppUpdateInfo> {
+export type AppUpdateInfo = AppUpdateStatus
+
+export async function checkForAppUpdate(): Promise<AppUpdateStatus> {
   const api = getDesktopAPI()
   if (api?.checkForUpdates) {
     return api.checkForUpdates()
   }
   return {
+    phase: 'error',
     currentVersion: '0.0.0',
     latestVersion: null,
-    updateAvailable: false,
-    downloadUrl: null,
-    releaseUrl: 'https://github.com/ProfessionalQwerty/ProjectPrism/releases/latest',
+    percent: null,
+    message: null,
     error: 'Not running in desktop app',
   }
 }
 
-export async function openUpdateDownload(url: string): Promise<void> {
+export async function downloadAppUpdate(): Promise<AppUpdateStatus> {
   const api = getDesktopAPI()
-  if (api?.openExternal) {
-    await api.openExternal(url)
+  if (api?.downloadUpdate) return api.downloadUpdate()
+  throw new Error('Updates are only available in the desktop app')
+}
+
+export async function installAppUpdate(): Promise<void> {
+  const api = getDesktopAPI()
+  if (api?.installUpdate) {
+    await api.installUpdate()
     return
   }
-  window.open(url, '_blank', 'noopener,noreferrer')
+  throw new Error('Updates are only available in the desktop app')
+}
+
+export function subscribeToUpdateStatus(
+  listener: (status: AppUpdateStatus) => void
+): (() => void) | null {
+  const api = getDesktopAPI()
+  if (api?.onUpdateStatus) return api.onUpdateStatus(listener)
+  return null
 }

@@ -2,7 +2,13 @@ import { app, BrowserWindow, dialog, ipcMain, Menu, nativeImage, shell } from 'e
 import { existsSync } from 'fs'
 import { join } from 'path'
 import { collectProjectFiles } from './collect-files'
-import { checkForUpdates } from './updater'
+import {
+  attachAutoUpdater,
+  checkForAppUpdates,
+  downloadAppUpdate,
+  getUpdateStatus,
+  installDownloadedUpdate,
+} from './auto-updater'
 
 const isDev = !app.isPackaged && process.env.ELECTRON_DEV === '1'
 
@@ -24,7 +30,7 @@ function resolveIndexHtml(): string {
   return join(app.getAppPath(), 'ui/dist/index.html')
 }
 
-function createWindow(): void {
+function createWindow(): BrowserWindow {
   Menu.setApplicationMenu(null)
 
   const icon = resolveAppIcon()
@@ -45,6 +51,7 @@ function createWindow(): void {
   })
 
   win.setMenuBarVisibility(false)
+  attachAutoUpdater(win)
 
   win.webContents.on('did-fail-load', (_event, errorCode, errorDescription, validatedURL) => {
     console.error('[PRISM] did-fail-load', { errorCode, errorDescription, validatedURL })
@@ -64,28 +71,29 @@ function createWindow(): void {
     console.log('[PRISM] Loading index from', indexPath)
     void win.loadFile(indexPath)
   }
+
+  return win
 }
 
 app.whenReady().then(() => {
-  createWindow()
+  const win = createWindow()
 
   if (!isDev && app.isPackaged) {
     void (async () => {
       await new Promise((r) => setTimeout(r, 8000))
-      const info = await checkForUpdates()
-      if (info.updateAvailable && info.latestVersion) {
-        const win = BrowserWindow.getAllWindows()[0]
-        const { response } = await dialog.showMessageBox(win ?? undefined, {
+      const status = await checkForAppUpdates()
+      if (status.phase === 'available' && status.latestVersion) {
+        const { response } = await dialog.showMessageBox(win, {
           type: 'info',
           title: 'Update available',
-          message: `PRISM v${info.latestVersion} is available (you have v${info.currentVersion}).`,
-          detail: 'Download the latest installer from GitHub Releases.',
-          buttons: ['Download', 'Later'],
+          message: `PRISM v${status.latestVersion} is available (you have v${app.getVersion()}).`,
+          detail: 'Download in the background and restart when ready?',
+          buttons: ['Download update', 'Later'],
           defaultId: 0,
           cancelId: 1,
         })
-        if (response === 0 && info.downloadUrl) {
-          void shell.openExternal(info.downloadUrl)
+        if (response === 0) {
+          await downloadAppUpdate()
         }
       }
     })()
@@ -102,7 +110,15 @@ app.on('window-all-closed', () => {
 
 ipcMain.handle('app:version', () => app.getVersion())
 
-ipcMain.handle('app:checkForUpdates', () => checkForUpdates())
+ipcMain.handle('app:checkForUpdates', () => checkForAppUpdates())
+
+ipcMain.handle('app:downloadUpdate', () => downloadAppUpdate())
+
+ipcMain.handle('app:installUpdate', () => {
+  installDownloadedUpdate()
+})
+
+ipcMain.handle('app:getUpdateStatus', () => getUpdateStatus())
 
 ipcMain.handle('dialog:pickFolder', async () => {
   const result = await dialog.showOpenDialog({
