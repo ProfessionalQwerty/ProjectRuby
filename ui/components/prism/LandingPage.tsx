@@ -55,7 +55,7 @@ const POSITIONING = [
     icon: Layers,
     title: 'Model-agnostic by design',
     body:
-      'PRISM is not a model provider — it is the environment models run inside. You work with Claude, GPT, Gemini, and local models in one place without betting on any single vendor. That independence is the moat: no provider can replace what PRISM remembers about your project.',
+      'PRISM is not a model provider — it is the environment models run inside. Connect Claude, ChatGPT, Gemini, and local models with standard OAuth web logins (your existing Plus/Pro subscriptions), not raw API keys or a separate PRISM AI bill.',
   },
   {
     icon: ScrollText,

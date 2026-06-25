@@ -1,17 +1,21 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { Plus } from 'lucide-react'
+import { LogIn, Plus } from 'lucide-react'
 import { cn } from '../../lib/utils'
 import { ModelLogo } from '../ui/ModelLogo'
 import { PrismGlyph } from './PrismGlyph'
 import { MODEL_CATALOG, getCatalogEntry, type ModelProviderId } from '../../lib/models'
+import { runLlmOAuthSignIn } from '../../lib/llm-auth'
 
 interface AgentBarProps {
   apiOnline: boolean
   activeAgentId: string | null
   projectModels: string[]
   onSelectAgent: (id: string) => void
-  onAddAgent: (modelId: ModelProviderId, apiKey?: string, local?: { port?: number; model?: string }) => Promise<void>
+  onAddAgent: (
+    modelId: ModelProviderId,
+    options?: { apiKey?: string; authType?: 'oauth' | 'api_key'; local?: { port?: number; model?: string } }
+  ) => Promise<void>
   onRemoveAgent: (id: string) => Promise<void>
 }
 
@@ -26,9 +30,12 @@ export function AgentBar({
   const [menuOpen, setMenuOpen] = useState(false)
   const [adding, setAdding] = useState<ModelProviderId | null>(null)
   const [apiKey, setApiKey] = useState('')
+  const [showAdvancedKey, setShowAdvancedKey] = useState(false)
   const [ollamaModel, setOllamaModel] = useState('llama3.2')
   const [ollamaPort, setOllamaPort] = useState('11434')
   const [submitting, setSubmitting] = useState(false)
+  const [signingIn, setSigningIn] = useState(false)
+  const [deviceCode, setDeviceCode] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [menuPos, setMenuPos] = useState({ top: 0, left: 0 })
   const menuRef = useRef<HTMLDivElement>(null)
@@ -63,10 +70,58 @@ export function AgentBar({
       if (menuRef.current?.contains(target) || addButtonRef.current?.contains(target)) return
       setMenuOpen(false)
       setAdding(null)
+      setShowAdvancedKey(false)
+      setDeviceCode(null)
     }
     document.addEventListener('mousedown', onClick)
     return () => document.removeEventListener('mousedown', onClick)
   }, [])
+
+  const resetForm = () => {
+    setMenuOpen(false)
+    setAdding(null)
+    setApiKey('')
+    setShowAdvancedKey(false)
+    setDeviceCode(null)
+  }
+
+  const handleOAuthSignIn = async () => {
+    const entry = adding ? getCatalogEntry(adding) : null
+    if (!entry?.oauthProvider) return
+    if (!apiOnline) {
+      setError('PRISM engine is offline. Start the daemon first (see banner above).')
+      return
+    }
+    setSigningIn(true)
+    setError(null)
+    try {
+      if (entry.oauthProvider === 'openai-codex') {
+        const { startChatGptSignIn, openOAuthUrl, pollChatGptSignIn } = await import('../../lib/llm-auth')
+        const started = await startChatGptSignIn()
+        setDeviceCode(started.userCode)
+        await openOAuthUrl(
+          `${started.verificationUri}?user_code=${encodeURIComponent(started.userCode)}`
+        )
+        for (let i = 0; i < 120; i++) {
+          await new Promise((r) => setTimeout(r, 3000))
+          const result = await pollChatGptSignIn(started.sessionId)
+          if (result === 'complete') {
+            await onAddAgent(adding!, { authType: 'oauth' })
+            resetForm()
+            return
+          }
+        }
+        throw new Error('ChatGPT sign-in timed out')
+      }
+      await runLlmOAuthSignIn(entry.oauthProvider)
+      await onAddAgent(adding!, { authType: 'oauth' })
+      resetForm()
+    } catch (err) {
+      setError((err as Error).message)
+    } finally {
+      setSigningIn(false)
+    }
+  }
 
   const handleAdd = async () => {
     if (!adding) return
@@ -78,24 +133,33 @@ export function AgentBar({
     setError(null)
     try {
       const entry = getCatalogEntry(adding)!
-      if (entry.requiresApiKey && !apiKey.trim()) {
+      if (entry.authMethod === 'api_key' && !apiKey.trim()) {
         setError('API key is required')
+        return
+      }
+      if (entry.authMethod === 'oauth' && showAdvancedKey && !apiKey.trim()) {
+        setError('Enter an API key or use web sign-in')
         return
       }
       await onAddAgent(
         adding,
-        entry.requiresApiKey ? apiKey.trim() : undefined,
-        adding === 'local-model' ? { port: Number(ollamaPort), model: ollamaModel } : undefined
+        entry.authMethod === 'oauth' && showAdvancedKey
+          ? { authType: 'api_key', apiKey: apiKey.trim() }
+          : entry.authMethod === 'api_key'
+            ? { authType: 'api_key', apiKey: apiKey.trim() }
+            : adding === 'local-model'
+              ? { local: { port: Number(ollamaPort), model: ollamaModel } }
+              : undefined
       )
-      setMenuOpen(false)
-      setAdding(null)
-      setApiKey('')
+      resetForm()
     } catch (err) {
       setError((err as Error).message)
     } finally {
       setSubmitting(false)
     }
   }
+
+  const addingEntry = adding ? getCatalogEntry(adding) : null
 
   const menuPanel = menuOpen ? (
     <div
@@ -124,12 +188,16 @@ export function AgentBar({
                   onClick={() => {
                     setAdding(model.id)
                     setError(null)
+                    setShowAdvancedKey(false)
+                    setDeviceCode(null)
                   }}
-                  className="flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-left hover:bg-neutral-50"
+                  className="flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-left hover:bg-neutral-50 dark:hover:bg-neutral-800"
                 >
                   <ModelLogo provider={model.id} size={22} />
                   <div>
-                    <div className="text-[14px] font-medium text-neutral-800">{model.name}</div>
+                    <div className="text-[14px] font-medium text-neutral-800 dark:text-neutral-100">
+                      {model.name}
+                    </div>
                     <div className="text-[12px] text-neutral-500">{model.description}</div>
                   </div>
                 </button>
@@ -141,12 +209,54 @@ export function AgentBar({
         <div className="p-4">
           <div className="mb-3 flex items-center gap-2">
             <ModelLogo provider={adding} size={22} />
-            <span className="text-[14px] font-medium">{getCatalogEntry(adding)?.name}</span>
+            <span className="text-[14px] font-medium">{addingEntry?.name}</span>
           </div>
-          {getCatalogEntry(adding)?.requiresApiKey && (
+
+          {addingEntry?.authMethod === 'oauth' && !showAdvancedKey && (
+            <div className="mb-3 space-y-2">
+              <p className="text-[12px] leading-relaxed text-neutral-600 dark:text-neutral-400">
+                Use your existing subscription — no API keys, no PRISM AI credits. Sign in with the
+                provider you already pay for.
+              </p>
+              {deviceCode ? (
+                <div className="rounded-md border border-violet-200 bg-violet-50 px-3 py-2 text-center dark:border-violet-900 dark:bg-violet-950/40">
+                  <p className="text-[11px] uppercase tracking-wide text-violet-700 dark:text-violet-300">
+                    Your device code
+                  </p>
+                  <p className="mt-1 font-mono text-[18px] font-semibold tracking-widest text-violet-900 dark:text-violet-100">
+                    {deviceCode}
+                  </p>
+                  <p className="mt-1 text-[11px] text-violet-800 dark:text-violet-200">
+                    Enter this at auth.openai.com if prompted
+                  </p>
+                </div>
+              ) : null}
+              <button
+                type="button"
+                disabled={signingIn || submitting}
+                onClick={() => void handleOAuthSignIn()}
+                className="flex w-full items-center justify-center gap-2 rounded-md bg-neutral-900 py-2.5 text-[13px] font-medium text-white disabled:opacity-50 dark:bg-violet-600"
+              >
+                <LogIn className="h-4 w-4" />
+                {signingIn ? 'Waiting for sign-in…' : addingEntry.oauthSignInLabel || 'Sign in'}
+              </button>
+              {addingEntry.supportsApiKeyFallback ? (
+                <button
+                  type="button"
+                  className="w-full text-[12px] text-neutral-500 underline-offset-2 hover:underline"
+                  onClick={() => setShowAdvancedKey(true)}
+                >
+                  Advanced: use API key instead
+                </button>
+              ) : null}
+            </div>
+          )}
+
+          {(addingEntry?.authMethod === 'api_key' ||
+            (addingEntry?.authMethod === 'oauth' && showAdvancedKey)) && (
             <label className="mb-3 block">
               <span className="mb-1 block text-[12px] text-neutral-600">
-                {getCatalogEntry(adding)?.apiKeyLabel}
+                {addingEntry?.apiKeyLabel || 'API Key'}
               </span>
               <input
                 type="password"
@@ -154,39 +264,60 @@ export function AgentBar({
                 onChange={(e) => setApiKey(e.target.value)}
                 placeholder="sk-..."
                 autoFocus
-                className="w-full rounded-md border border-neutral-200 px-3 py-2 text-[14px] outline-none focus:border-violet-400 focus:ring-1 focus:ring-violet-200"
+                className="w-full rounded-md border border-neutral-200 px-3 py-2 text-[14px] outline-none focus:border-violet-400 focus:ring-1 focus:ring-violet-200 dark:border-neutral-700 dark:bg-neutral-800"
               />
             </label>
           )}
+
           {adding === 'local-model' && (
             <div className="mb-3 space-y-2">
               <input
                 value={ollamaModel}
                 onChange={(e) => setOllamaModel(e.target.value)}
                 placeholder="Model name"
-                className="w-full rounded-md border border-neutral-200 px-3 py-2 text-[14px]"
+                className="w-full rounded-md border border-neutral-200 px-3 py-2 text-[14px] dark:border-neutral-700 dark:bg-neutral-800"
               />
               <input
                 value={ollamaPort}
                 onChange={(e) => setOllamaPort(e.target.value)}
                 placeholder="Port"
-                className="w-full rounded-md border border-neutral-200 px-3 py-2 text-[14px]"
+                className="w-full rounded-md border border-neutral-200 px-3 py-2 text-[14px] dark:border-neutral-700 dark:bg-neutral-800"
               />
             </div>
           )}
+
           {error && <p className="mb-2 text-[12px] text-red-600">{error}</p>}
           <div className="flex gap-2">
-            <button type="button" onClick={() => setAdding(null)} className="flex-1 rounded-md border py-2 text-[13px]">
-              Back
-            </button>
             <button
               type="button"
-              disabled={submitting}
-              onClick={() => void handleAdd()}
-              className="flex-1 rounded-md bg-neutral-900 py-2 text-[13px] font-medium text-white disabled:opacity-50"
+              onClick={() => {
+                setAdding(null)
+                setShowAdvancedKey(false)
+                setDeviceCode(null)
+              }}
+              className="flex-1 rounded-md border py-2 text-[13px]"
             >
-              {submitting ? 'Adding…' : 'Add'}
+              Back
             </button>
+            {(addingEntry?.authMethod !== 'oauth' || showAdvancedKey) && adding !== 'local-model' ? (
+              <button
+                type="button"
+                disabled={submitting || signingIn}
+                onClick={() => void handleAdd()}
+                className="flex-1 rounded-md bg-neutral-900 py-2 text-[13px] font-medium text-white disabled:opacity-50"
+              >
+                {submitting ? 'Adding…' : 'Add'}
+              </button>
+            ) : adding === 'local-model' ? (
+              <button
+                type="button"
+                disabled={submitting}
+                onClick={() => void handleAdd()}
+                className="flex-1 rounded-md bg-neutral-900 py-2 text-[13px] font-medium text-white disabled:opacity-50"
+              >
+                {submitting ? 'Adding…' : 'Add'}
+              </button>
+            ) : null}
           </div>
         </div>
       )}

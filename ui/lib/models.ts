@@ -9,11 +9,19 @@ export type ModelProviderId =
   | 'grok'
   | 'qwen'
 
+export type LlmOAuthProviderId = 'anthropic' | 'openai-codex'
+
+export type ModelAuthMethod = 'oauth' | 'api_key' | 'none'
+
 export interface ModelCatalogEntry {
   id: ModelProviderId
   name: string
   description: string
-  requiresApiKey: boolean
+  authMethod: ModelAuthMethod
+  oauthProvider?: LlmOAuthProviderId
+  oauthSignInLabel?: string
+  /** Optional developer fallback — hidden behind Advanced */
+  supportsApiKeyFallback?: boolean
   apiKeyLabel?: string
   providerLabel: string
 }
@@ -22,24 +30,30 @@ export const MODEL_CATALOG: ModelCatalogEntry[] = [
   {
     id: 'openai',
     name: 'OpenAI',
-    description: 'GPT-4o and Codex-class models',
-    requiresApiKey: true,
-    apiKeyLabel: 'OpenAI API Key',
+    description: 'GPT-4o via your ChatGPT Plus/Pro subscription',
+    authMethod: 'oauth',
+    oauthProvider: 'openai-codex',
+    oauthSignInLabel: 'Sign in with ChatGPT',
+    supportsApiKeyFallback: true,
+    apiKeyLabel: 'OpenAI API Key (advanced)',
     providerLabel: 'OpenAI',
   },
   {
     id: 'claude-code',
     name: 'Claude',
-    description: 'Anthropic Claude via API or CLI',
-    requiresApiKey: true,
-    apiKeyLabel: 'Anthropic API Key',
+    description: 'Anthropic Claude via your Claude Pro/Max subscription',
+    authMethod: 'oauth',
+    oauthProvider: 'anthropic',
+    oauthSignInLabel: 'Sign in with Claude',
+    supportsApiKeyFallback: true,
+    apiKeyLabel: 'Anthropic API Key (advanced)',
     providerLabel: 'Claude',
   },
   {
     id: 'gemini-cli',
     name: 'Gemini',
     description: 'Google Gemini models',
-    requiresApiKey: true,
+    authMethod: 'api_key',
     apiKeyLabel: 'Google AI API Key',
     providerLabel: 'Gemini',
   },
@@ -47,7 +61,7 @@ export const MODEL_CATALOG: ModelCatalogEntry[] = [
     id: 'deepseek',
     name: 'DeepSeek',
     description: 'DeepSeek Chat and coder models',
-    requiresApiKey: true,
+    authMethod: 'api_key',
     apiKeyLabel: 'DeepSeek API Key',
     providerLabel: 'DeepSeek',
   },
@@ -55,7 +69,7 @@ export const MODEL_CATALOG: ModelCatalogEntry[] = [
     id: 'mistral',
     name: 'Mistral',
     description: 'Mistral AI models',
-    requiresApiKey: true,
+    authMethod: 'api_key',
     apiKeyLabel: 'Mistral API Key',
     providerLabel: 'Mistral',
   },
@@ -63,7 +77,7 @@ export const MODEL_CATALOG: ModelCatalogEntry[] = [
     id: 'grok',
     name: 'Grok',
     description: 'xAI Grok models',
-    requiresApiKey: true,
+    authMethod: 'api_key',
     apiKeyLabel: 'xAI API Key',
     providerLabel: 'Grok',
   },
@@ -71,26 +85,34 @@ export const MODEL_CATALOG: ModelCatalogEntry[] = [
     id: 'qwen',
     name: 'Qwen',
     description: 'Alibaba Qwen models (DashScope)',
-    requiresApiKey: true,
+    authMethod: 'api_key',
     apiKeyLabel: 'DashScope API Key',
     providerLabel: 'Qwen',
   },
   {
     id: 'codex',
     name: 'Codex',
-    description: 'OpenAI Codex for code generation',
-    requiresApiKey: true,
-    apiKeyLabel: 'OpenAI API Key',
+    description: 'OpenAI Codex for code generation (ChatGPT subscription)',
+    authMethod: 'oauth',
+    oauthProvider: 'openai-codex',
+    oauthSignInLabel: 'Sign in with ChatGPT',
+    supportsApiKeyFallback: true,
+    apiKeyLabel: 'OpenAI API Key (advanced)',
     providerLabel: 'Codex',
   },
   {
     id: 'local-model',
     name: 'Ollama',
-    description: 'Local models via Ollama',
-    requiresApiKey: false,
+    description: 'Local models via Ollama — no cloud account needed',
+    authMethod: 'none',
     providerLabel: 'Ollama',
   },
 ]
+
+/** @deprecated use authMethod === 'api_key' */
+export function requiresApiKey(entry: ModelCatalogEntry): boolean {
+  return entry.authMethod === 'api_key'
+}
 
 export const USER_AGENTS_STORAGE_KEY = 'prism-user-agents'
 

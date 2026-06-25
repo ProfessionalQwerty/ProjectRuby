@@ -534,7 +534,14 @@ export function useWorkspaceState() {
   }, [messages, sessionId, activeChatTabId, activeAgentId, activeProjectId])
 
   const addAgent = useCallback(
-    async (modelId: ModelProviderId, apiKey?: string, localConfig?: { port?: number; model?: string }) => {
+    async (
+      modelId: ModelProviderId,
+      options?: {
+        apiKey?: string
+        authType?: 'oauth' | 'api_key'
+        local?: { port?: number; model?: string }
+      }
+    ) => {
       const online = await checkApiHealth()
       if (!online) {
         throw new Error('PRISM engine is offline. Start the daemon on port 19991 first.')
@@ -544,11 +551,17 @@ export function useWorkspaceState() {
       if (!catalog) throw new Error('Unknown model')
 
       const config: Record<string, unknown> = { enabled: true }
-      if (apiKey) config.apiKey = apiKey
+      if (options?.authType === 'oauth' && catalog.oauthProvider) {
+        config.authType = 'oauth'
+        config.oauthProvider = catalog.oauthProvider
+      } else if (options?.apiKey) {
+        config.apiKey = options.apiKey
+        config.authType = 'api_key'
+      }
       if (modelId === 'local-model') {
-        config.port = localConfig?.port || 11434
+        config.port = options?.local?.port || 11434
         config.service = 'ollama'
-        config.model = localConfig?.model || 'llama3.2'
+        config.model = options?.local?.model || 'llama3.2'
         config.host = 'localhost'
       }
 
