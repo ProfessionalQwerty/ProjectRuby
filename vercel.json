@@ -1,6 +1,6 @@
 {
-  "installCommand": "npm install",
-  "buildCommand": "npm run build -w ui",
+  "installCommand": "npm install --prefix ui",
+  "buildCommand": "npm run build:vercel --prefix ui",
   "outputDirectory": "ui/dist",
   "framework": null,
   "rewrites": [{ "source": "/((?!assets/|ailogos/|prism-logo).*)", "destination": "/index.html" }]
