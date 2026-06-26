@@ -104,7 +104,7 @@ jobs:
           sudo apt-get install -y libfuse2 desktop-file-utils
 
       - name: Build UI and desktop
-        run: npm run build:electron && node scripts/copy-main-deps.mjs && npm run verify-cloud-build
+        run: npm run build:electron && npm run rebuild:native && node scripts/copy-main-deps.mjs && node scripts/verify-native-deps.mjs && npm run verify-cloud-build
         env:
           VITE_ELECTRON: '1'
           VITE_API_URL: https://yashshshsh-prism.hf.space
@@ -116,6 +116,10 @@ jobs:
       - name: Verify updater bundled (Windows)
         if: matrix.platform == 'win'
         run: node scripts/verify-asar-updater.mjs
+
+      - name: Verify node-pty staged (Windows)
+        if: matrix.platform == 'win'
+        run: node scripts/verify-asar-node-pty.mjs
 
       - name: Build installers
         if: matrix.platform == 'linux'

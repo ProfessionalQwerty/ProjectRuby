@@ -2,7 +2,6 @@ import { app, BrowserWindow, dialog, ipcMain, Menu, nativeImage, shell } from 'e
 import { existsSync } from 'fs'
 import { join } from 'path'
 import { collectProjectFiles } from './collect-files'
-import { registerPtyHandlers } from './pty-host'
 import type * as AutoUpdaterApi from './auto-updater'
 
 const isDev = !app.isPackaged && process.env.ELECTRON_DEV === '1'
@@ -93,10 +92,17 @@ function unavailableUpdateStatus() {
 
 app.whenReady().then(() => {
   const win = createWindow()
-  const terminalReady = registerPtyHandlers()
-  if (!terminalReady) {
-    console.warn('[PRISM] Packaged terminal unavailable — rebuild with node-pty prebuilds for your platform')
-  }
+  void (async () => {
+    try {
+      const { registerPtyHandlers } = await import('./pty-host')
+      const terminalReady = registerPtyHandlers()
+      if (!terminalReady) {
+        console.warn('[PRISM] Packaged terminal unavailable — run npm run rebuild:native && npm run dist')
+      }
+    } catch (err) {
+      console.warn('[PRISM] PTY host failed to load:', (err as Error).message)
+    }
+  })()
   const autoUpdaterApi = loadAutoUpdaterApi()
   autoUpdaterApi?.attachAutoUpdater(win)
 

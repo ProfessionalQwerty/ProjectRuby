@@ -1,5 +1,10 @@
+import { createRequire } from 'module'
+import { join } from 'path'
 import { ipcMain, type IpcMainInvokeEvent, type WebContents } from 'electron'
 import { normalizeTerminalChunk } from './terminal-sanitize'
+
+/** Resolve node-pty from desktop/dist/node_modules (packaged + dev). */
+const requireFromDist = createRequire(join(__dirname, 'package.json'))
 
 type PtyModule = typeof import('node-pty')
 type IPty = import('node-pty').IPty
@@ -25,6 +30,22 @@ let ptyLoadError: string | null = null
 function loadPtyModule(): PtyModule {
   if (ptyModule) return ptyModule
   if (ptyLoadError) throw new Error(ptyLoadError)
+
+  const candidates = [
+    join(__dirname, 'node_modules', 'node-pty'),
+    join(__dirname, '..', '..', 'node_modules', 'node-pty'),
+  ]
+
+  for (const candidate of candidates) {
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      ptyModule = requireFromDist(candidate) as PtyModule
+      return ptyModule
+    } catch {
+      // try next path
+    }
+  }
+
   try {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     ptyModule = require('node-pty') as PtyModule

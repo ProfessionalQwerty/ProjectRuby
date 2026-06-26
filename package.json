@@ -16,15 +16,28 @@
     "dev": "concurrently -k \"npm run dev -w ui\" \"wait-on http://localhost:5173 && npm run dev -w desktop\"",
     "build": "npm run build -w ui && npm run build -w desktop",
     "build:electron": "cross-env VITE_ELECTRON=1 npm run build -w ui && npm run build -w desktop",
+    "rebuild:native": "node scripts/rebuild-native.mjs",
     "dist": "npm run build:electron && npm run dist:only",
-    "dist:only": "node scripts/copy-main-deps.mjs && node scripts/copy-rtk-binaries.mjs && cross-env CSC_IDENTITY_AUTO_DISCOVERY=false electron-builder --config electron-builder.yml",
+    "dist:only": "npm run rebuild:native && node scripts/copy-main-deps.mjs && node scripts/verify-native-deps.mjs && node scripts/copy-rtk-binaries.mjs && cross-env CSC_IDENTITY_AUTO_DISCOVERY=false electron-builder --config electron-builder.yml",
     "dist:publish": "npm run build:electron && cross-env CSC_IDENTITY_AUTO_DISCOVERY=false electron-builder --config electron-builder.yml --publish always",
     "verify-cloud-build": "node scripts/verify-cloud-build.mjs",
     "generate-icons": "node scripts/generate-icons.js",
     "type-check": "npm run type-check -w ui",
     "verify-boundary": "powershell -ExecutionPolicy Bypass -File ../scripts/verify-deploy-boundaries.ps1"
   },
+  "build": {
+    "asar": true,
+    "asarUnpack": [
+      "**/node_modules/node-pty/**",
+      "**/node-pty/**",
+      "**/prebuilds/**",
+      "**/build/Release/**",
+      "**/*.node"
+    ],
+    "npmRebuild": false
+  },
   "devDependencies": {
+    "@electron/rebuild": "^3.7.2",
     "concurrently": "^9.1.2",
     "cross-env": "^7.0.3",
     "electron-builder": "^25.1.8",
@@ -36,6 +49,7 @@
   "dependencies": {
     "electron-updater": "^6.8.9",
     "extract-zip": "^2.0.1",
+    "node-pty": "^1.2.0-beta.13",
     "tar": "^7.4.3"
   }
 }

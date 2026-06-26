@@ -6,10 +6,17 @@ directories:
   output: release
   buildResources: build
 
-# Native .node binaries cannot execute from inside app.asar
+# Native .node binaries cannot execute from inside app.asar — extract to app.asar.unpacked
+asar: true
 asarUnpack:
-  - "**/*.node"
+  - "**/node_modules/node-pty/**"
   - "**/node-pty/**"
+  - "**/prebuilds/**"
+  - "**/build/Release/**"
+  - "**/*.node"
+
+# node-pty is copied into desktop/dist via scripts/copy-main-deps.mjs (not root dependencies)
+npmRebuild: false
 
 files:
   - desktop/dist/**/*
