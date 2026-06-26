@@ -17,6 +17,7 @@
     "build": "npm run build -w ui && npm run build -w desktop",
     "build:electron": "cross-env VITE_ELECTRON=1 npm run build -w ui && npm run build -w desktop",
     "rebuild:native": "node scripts/rebuild-native.mjs",
+    "setup:pty-beta": "node scripts/setup-pty-beta.mjs",
     "dist": "npm run build:electron && npm run dist:only",
     "dist:only": "npm run rebuild:native && node scripts/copy-main-deps.mjs && node scripts/verify-native-deps.mjs && node scripts/copy-rtk-binaries.mjs && cross-env CSC_IDENTITY_AUTO_DISCOVERY=false electron-builder --config electron-builder.yml",
     "dist:publish": "npm run build:electron && cross-env CSC_IDENTITY_AUTO_DISCOVERY=false electron-builder --config electron-builder.yml --publish always",
@@ -49,7 +50,9 @@
   "dependencies": {
     "electron-updater": "^6.8.9",
     "extract-zip": "^2.0.1",
-    "node-pty": "^1.2.0-beta.13",
     "tar": "^7.4.3"
+  },
+  "overrides": {
+    "node-pty": "1.1.0"
   }
 }
