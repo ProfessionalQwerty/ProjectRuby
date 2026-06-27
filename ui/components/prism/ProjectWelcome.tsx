@@ -4,7 +4,6 @@ import { isDesktopApp, pickFolderAndCollect } from '../../lib/desktop-bridge'
 import type { Project } from '../../hooks/useWorkspaceState'
 import { DaemonBanner } from './DaemonBanner'
 import { TitleBar } from './TitleBar'
-import { PrismShaderBackdrop } from '../ui/prism-shader-backdrop'
 import { Users } from 'lucide-react'
 import { createTeam, createTeamInvite, redeemInvite } from '../../lib/team-api'
 
@@ -114,8 +113,7 @@ export function ProjectWelcome({
   }
 
   return (
-    <div className="workspace-theme relative flex h-screen flex-col overflow-hidden text-[16px] dark:text-neutral-100">
-      <PrismShaderBackdrop variant="full" />
+    <div className="workspace-theme relative flex h-screen flex-col overflow-hidden bg-neutral-50 text-[16px] dark:bg-neutral-950 dark:text-neutral-100">
       {!apiOnline && <DaemonBanner onRetry={onRetryConnection} />}
 
       <TitleBar dark={dark} onToggleTheme={onToggleTheme} />
@@ -123,7 +121,7 @@ export function ProjectWelcome({
       <div className="relative z-10 flex flex-1 items-center justify-center p-6">
         <div className="w-full max-w-lg">
           <div className="mb-8 text-center">
-            <h1 className="text-2xl font-semibold tracking-tight text-neutral-900 dark:text-neutral-50">
+            <h1 className="bg-gradient-to-r from-violet-600 via-fuchsia-500 to-amber-500 bg-clip-text text-3xl font-semibold tracking-tight text-transparent">
               PRISM
             </h1>
             <p className="mt-2 text-[14px] text-neutral-500 dark:text-neutral-400">

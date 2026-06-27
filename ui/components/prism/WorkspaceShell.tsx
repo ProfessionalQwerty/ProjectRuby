@@ -9,7 +9,8 @@ import { ModeSelector } from './ModeSelector'
 import { TokenCapModal } from './TokenCapModal'
 import { DaemonBanner } from './DaemonBanner'
 import { ChatTabBar } from './ChatTabBar'
-import { PrismShaderBackdrop } from '../ui/prism-shader-backdrop'
+import { WorldModelConsentModal } from './WorldModelConsentModal'
+import { hasSeenTelemetryPrompt } from '../../lib/telemetry-consent'
 import { useWorkspaceState } from '../../hooks/useWorkspaceState'
 import { useConnections } from '../../hooks/useConnections'
 import { useTheme } from '../../lib/theme'
@@ -22,6 +23,11 @@ export function WorkspaceShell() {
   const [connectOpen, setConnectOpen] = useState(false)
   const [sessionsAgentId, setSessionsAgentId] = useState<string | null>(null)
   const [connectionsTabFocus, setConnectionsTabFocus] = useState(false)
+  const [consentOpen, setConsentOpen] = useState(false)
+
+  React.useEffect(() => {
+    if (!hasSeenTelemetryPrompt()) setConsentOpen(true)
+  }, [])
 
   const viewSessionsAgentId = sessionsAgentId || ws.activeAgentId
   const sessionsForView = viewSessionsAgentId
@@ -50,8 +56,7 @@ export function WorkspaceShell() {
   }
 
   return (
-    <div className="workspace-theme relative flex h-screen flex-col overflow-hidden text-[16px] dark:text-neutral-100">
-      <PrismShaderBackdrop variant="full" />
+    <div className="workspace-theme relative flex h-screen flex-col overflow-hidden bg-neutral-50 text-[16px] dark:bg-neutral-950 dark:text-neutral-100">
       {!ws.apiOnline && <DaemonBanner onRetry={() => void ws.retryConnection()} />}
 
       <TitleBar dark={dark} onToggleTheme={toggle}>
@@ -150,6 +155,8 @@ export function WorkspaceShell() {
         onClose={ws.clearTokenCapMessage}
         onOptIn={ws.clearTokenCapMessage}
       />
+
+      {consentOpen && <WorldModelConsentModal onClose={() => setConsentOpen(false)} />}
     </div>
   )
 }

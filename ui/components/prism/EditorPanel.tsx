@@ -4,7 +4,6 @@ import { cn } from '../../lib/utils'
 import { QUICK_COMMANDS } from '../../lib/commands'
 import { ModelLogo } from '../ui/ModelLogo'
 import { AgentThinking } from '../ui/AgentThinking'
-import { ChatShaderBackground } from './ChatShaderBackground'
 import { ModelRouter } from './ModelRouter'
 import { ModeSelector } from './ModeSelector'
 import { getModelOption } from '../../lib/model-router'
@@ -66,10 +65,8 @@ export function EditorPanel({
   }, [draftVision, onSaveVision])
 
   return (
-    <main className="relative flex min-w-0 flex-1 flex-col text-[16px]">
-      <ChatShaderBackground />
-
-      <div className="relative z-10 border-b border-neutral-200/80 bg-white/75 px-5 py-3.5 backdrop-blur-md dark:border-neutral-700 dark:bg-neutral-900/75">
+    <main className="relative flex min-w-0 flex-1 flex-col bg-white text-[16px] dark:bg-neutral-950">
+      <div className="relative z-10 border-b border-neutral-200/80 bg-white px-5 py-3.5 dark:border-neutral-800 dark:bg-neutral-950">
         {editingVision ? (
           <div className="flex gap-3">
             <textarea
@@ -140,7 +137,7 @@ export function EditorPanel({
         )}
       </div>
 
-      <div className="relative z-10 border-t border-neutral-200/80 bg-white/80 p-5 backdrop-blur-md dark:border-neutral-700 dark:bg-neutral-900/80">
+      <div className="relative z-10 border-t border-neutral-200/80 bg-white p-5 dark:border-neutral-800 dark:bg-neutral-950">
         <div className="mb-3 flex items-center justify-between gap-2">
           <div className="flex items-center gap-2">
             <ModeSelector

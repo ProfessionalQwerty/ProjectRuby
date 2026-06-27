@@ -3,6 +3,7 @@ import { LandingPage } from './components/prism/LandingPage'
 import { FeaturesDetailPage } from './components/prism/FeaturesDetailPage'
 import { PrismDemoPage } from './components/prism/PrismDemoPage'
 import { PrivacyPolicyPage } from './components/prism/PrivacyPolicyPage'
+import { TermsPage } from './components/prism/TermsPage'
 import { IntegrationsPage } from './components/prism/IntegrationsPage'
 import { TechnologiesPage } from './components/prism/TechnologiesPage'
 import { PricingPage } from './components/prism/PricingPage'
@@ -16,11 +17,12 @@ import {
   type PrismAuthUser,
 } from './lib/supabase-auth'
 
-export type PrismView = 'landing' | 'demo' | 'features' | 'privacy' | 'integrations' | 'technologies' | 'pricing' | 'workspace'
+export type PrismView = 'landing' | 'demo' | 'features' | 'privacy' | 'terms' | 'integrations' | 'technologies' | 'pricing' | 'workspace'
 
 function viewFromHash(): PrismView {
   const hash = window.location.hash.replace('#', '')
   if (hash === 'privacy') return 'privacy'
+  if (hash === 'terms') return 'terms'
   if (hash === 'integrations') return 'integrations'
   if (hash === 'technologies') return 'technologies'
   if (hash === 'pricing') return 'pricing'
@@ -83,6 +85,8 @@ const App: React.FC = () => {
       return <FeaturesDetailPage onBack={() => goTo('landing')} />
     case 'privacy':
       return <PrivacyPolicyPage onBack={() => goTo('landing')} />
+    case 'terms':
+      return <TermsPage onBack={() => goTo('landing')} />
     case 'integrations':
       return <IntegrationsPage onBack={() => goTo('landing')} onTechnologies={() => goTo('technologies')} />
     case 'technologies':
@@ -104,6 +108,7 @@ const App: React.FC = () => {
           onIntegrations={() => goTo('integrations')}
           onTechnologies={() => goTo('technologies')}
           onPricing={() => goTo('pricing')}
+          onTerms={() => goTo('terms')}
         />
       )
   }

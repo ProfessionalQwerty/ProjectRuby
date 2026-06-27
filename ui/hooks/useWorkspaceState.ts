@@ -280,10 +280,13 @@ export function useWorkspaceState() {
     }
 
     try {
-      const [visionRes, graphRes, ledgerRes] = await Promise.all([
+      const [visionRes, filesRes, graphRes, ledgerRes] = await Promise.all([
         apiClient.get<{ success: boolean; vision: { content: string } }>(
           '/api/repository-memory/vision'
         ),
+        apiClient
+          .get<{ success: boolean; files?: string[] }>('/api/files')
+          .catch(() => ({ success: false, files: [] as string[] })),
         apiClient.get<{
           success: boolean
           stats: { topFiles?: { file: string }[] }
@@ -294,7 +297,11 @@ export function useWorkspaceState() {
       ])
 
       setVision(visionRes.vision.content || fallbackVision)
-      setRepoFiles(graphRes.stats?.topFiles?.map((f) => f.file) || [])
+      // Full project tree from /api/files; fall back to graph top files if empty.
+      const fullFiles = filesRes.files || []
+      setRepoFiles(
+        fullFiles.length > 0 ? fullFiles : graphRes.stats?.topFiles?.map((f) => f.file) || []
+      )
       setLedgerEntries(mapLedgerEntries(ledgerRes.entries || []))
       setApiOnline(true)
     } catch {

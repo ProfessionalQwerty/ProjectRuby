@@ -222,8 +222,9 @@ export const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess, onError })
         </div>
 
         <p style={styles.footer}>
-          By signing in, you agree to our <a href="#" style={styles.link}>Terms of Service</a> and{' '}
-          <a href="#" style={styles.link}>Privacy Policy</a>
+          By signing in, you agree to our{' '}
+          <a href="#terms" target="_blank" rel="noopener noreferrer" style={styles.link}>Terms of Service</a> and{' '}
+          <a href="#privacy" target="_blank" rel="noopener noreferrer" style={styles.link}>Privacy Policy</a>
         </p>
 
         <div style={styles.infoBox}>

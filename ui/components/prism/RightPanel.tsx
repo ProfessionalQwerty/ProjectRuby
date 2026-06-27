@@ -1,5 +1,13 @@
 import React, { useEffect, useState } from 'react'
-import { ChevronDown, Link2, MessageSquare, Plus, ScrollText, Trash2 } from 'lucide-react'
+import {
+  ChevronDown,
+  Link2,
+  MessageSquare,
+  Plus,
+  ScrollText,
+  TerminalSquare,
+  Trash2,
+} from 'lucide-react'
 import { cn } from '../../lib/utils'
 import { ModelLogo } from '../ui/ModelLogo'
 import { getCatalogEntry } from '../../lib/models'
@@ -106,15 +114,15 @@ export function RightPanel({
   }, [activeProjectId])
 
   return (
-    <aside className="flex w-[360px] shrink-0 flex-col border-l border-neutral-300/60 bg-[#f3f3f3]/75 backdrop-blur-md dark:border-neutral-700 dark:bg-neutral-900/75">
-      <div className="flex h-12 items-center justify-between border-b border-neutral-300/80 px-3 dark:border-neutral-700">
-        <div className="flex gap-1">
+    <aside className="flex w-[360px] shrink-0 flex-col border-l border-neutral-300/60 bg-[#f3f3f3] dark:border-neutral-800 dark:bg-neutral-900">
+      <div className="flex h-12 items-center justify-between gap-2 border-b border-neutral-300/80 px-3 dark:border-neutral-800">
+        <div className="flex min-w-0 items-center gap-0.5">
           <TabBtn active={tab === 'datalog'} onClick={() => setTab('datalog')} icon={<ScrollText className="h-3.5 w-3.5" />} label="Datalog" />
           <TabBtn active={tab === 'sessions'} onClick={() => setTab('sessions')} icon={<MessageSquare className="h-3.5 w-3.5" />} label="Sessions" />
           <TabBtn active={tab === 'connections'} onClick={() => setTab('connections')} icon={<Link2 className="h-3.5 w-3.5" />} label="Connections" />
-          <TabBtn active={tab === 'terminal'} onClick={() => setTab('terminal')} icon={<ScrollText className="h-3.5 w-3.5" />} label="Terminal" />
+          <TabBtn active={tab === 'terminal'} onClick={() => setTab('terminal')} icon={<TerminalSquare className="h-3.5 w-3.5" />} label="Terminal" />
         </div>
-        <span className="flex items-center gap-1.5 text-[12px] text-neutral-500 dark:text-neutral-400">
+        <span className="flex shrink-0 items-center gap-1.5 text-[12px] text-neutral-500 dark:text-neutral-400">
           <span className={cn('h-2 w-2 rounded-full', apiOnline ? 'bg-emerald-500' : 'bg-amber-500')} />
           {apiOnline ? 'Live' : 'Offline'}
         </span>
@@ -330,15 +338,18 @@ function TabBtn({
     <button
       type="button"
       onClick={onClick}
+      title={label}
+      aria-label={label}
       className={cn(
-        'flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-[12px] font-medium transition-colors',
+        'flex shrink-0 items-center gap-1.5 rounded-md px-2.5 py-1.5 text-[12px] font-medium transition-colors',
         active
           ? 'bg-white text-neutral-900 shadow-sm dark:bg-neutral-800 dark:text-neutral-100'
-          : 'text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300'
+          : 'text-neutral-500 hover:bg-neutral-200/60 hover:text-neutral-700 dark:hover:bg-neutral-800 dark:hover:text-neutral-300'
       )}
     >
       {icon}
-      {label}
+      {/* Show the label only for the active tab so all four fit without truncating. */}
+      <span className={cn(active ? 'inline' : 'hidden')}>{label}</span>
     </button>
   )
 }

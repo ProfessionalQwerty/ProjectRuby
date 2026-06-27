@@ -2,17 +2,18 @@ import React, { useCallback, useState } from 'react'
 import {
   ArrowRight,
   Brain,
+  Check,
   Code2,
   FileLock2,
-  GitBranch,
   History,
-  Layers,
   Play,
   Repeat,
   Rocket,
-  ScrollText,
+  ShieldCheck,
+  Sparkles,
   Terminal,
   Globe,
+  X,
   Zap,
 } from 'lucide-react'
 import { GitHubIcon } from '../ui/GitHubIcon'
@@ -32,66 +33,43 @@ const GITHUB_APP_URL = GITHUB_REPO_URL
 
 const MODEL_PROVIDERS = ['openai', 'claude-code', 'gemini-cli', 'local-model'] as const
 
-const PILLARS = [
+// Plain-language outcomes — what you actually get, no jargon.
+const OUTCOMES = [
   {
     icon: Brain,
-    title: 'Persistent memory',
-    body: 'Your repo context survives every model switch and session.',
+    title: 'Never re-explain your project',
+    body: 'PRISM remembers your whole codebase, every decision, and every past chat — so you can pick up exactly where you left off, even weeks later.',
   },
   {
     icon: Repeat,
-    title: 'Any model',
-    body: 'Claude, GPT, Gemini, or local — all in one workspace.',
+    title: 'Use any AI, all in one place',
+    body: 'Claude, ChatGPT, Gemini, or a local model. Switch anytime without losing your context — and use the subscriptions you already pay for.',
   },
   {
-    icon: Zap,
-    title: 'Warm starts',
-    body: 'New chats inherit context. Stop re-explaining your codebase.',
+    icon: Rocket,
+    title: 'Ship without the scary parts',
+    body: 'Go from an idea to a live website without touching a terminal or typing a single git command.',
   },
 ]
 
-const COMPRESSION_LAYERS = [
-  {
-    layer: 'Layer 1 — RTK',
-    tech: 'Rust Token Killer',
-    body: 'Terminal output, logs, ledger writes, and grep results — scrubbed before they enter memory.',
-  },
-  {
-    layer: 'Layer 2 — Headroom',
-    tech: 'SmartCrusher + Kompress',
-    body: 'JSON tool results, code blocks, and conversation history compressed up to 60–95% before model APIs (desktop).',
-  },
-  {
-    layer: 'Layer 3 — PRISM graph',
-    tech: 'AST + vector search',
-    body: 'Relevance-ranked file snippets trimmed to your token budget on every call.',
-  },
-]
-
-const POSITIONING = [
-  {
-    icon: Layers,
-    title: 'Model-agnostic by design',
-    body:
-      'PRISM is not a model provider — it is the environment models run inside. Connect Claude, ChatGPT, Gemini, and local models with standard OAuth web logins (your existing Plus/Pro subscriptions), not raw API keys or a separate PRISM AI bill.',
-  },
-  {
-    icon: ScrollText,
-    title: 'Your architectural log — not theirs',
-    body:
-      'After six months in PRISM, every decision, build, failure, fix, and architectural choice lives in your project graph and execution ledger — not in Claude’s memory or GPT’s context window. Each agent run is documented: what changed, why, and which files were touched.',
-  },
+// PRISM vs typical AI coding tools — concrete, scannable, not wordy.
+const COMPARISON = [
+  { label: 'Remembers your whole project, long-term', prism: true, others: false, othersNote: 'Forgets between chats' },
+  { label: 'Works with every major AI model', prism: true, others: false, othersNote: 'Locked to one' },
+  { label: 'Your history stays yours', prism: true, others: false, othersNote: 'Lives in the AI’s memory' },
+  { label: 'Go live with one click', prism: true, others: false, othersNote: 'You wire it up yourself' },
+  { label: 'Open source & transparent', prism: true, others: false, othersNote: 'Closed box' },
 ]
 
 const CAPABILITIES = [
-  { icon: Brain, label: 'Cross-session memory' },
-  { icon: GitBranch, label: 'Multi-agent pipelines' },
+  { icon: Brain, label: 'Remembers everything' },
+  { icon: Repeat, label: 'Any AI model' },
   { icon: Rocket, label: 'One-click deploy' },
-  { icon: FileLock2, label: 'File-lock safety' },
-  { icon: Zap, label: '60–95% compression stack' },
-  { icon: History, label: 'Per-model history' },
-  { icon: Terminal, label: '/catchup sync' },
-  { icon: Globe, label: 'Local preview' },
+  { icon: FileLock2, label: 'Safe parallel edits' },
+  { icon: Zap, label: 'Lower AI costs' },
+  { icon: History, label: 'History per model' },
+  { icon: Terminal, label: 'Instant catch-up' },
+  { icon: Globe, label: 'Live preview' },
 ]
 
 function ModelPills({ className }: { className?: string }) {
@@ -117,6 +95,7 @@ interface LandingPageProps {
   onIntegrations: () => void
   onTechnologies: () => void
   onPricing: () => void
+  onTerms?: () => void
 }
 
 function useInstallCopy() {
@@ -138,6 +117,7 @@ export function LandingPage({
   onIntegrations,
   onTechnologies,
   onPricing,
+  onTerms,
 }: LandingPageProps) {
   const { copied, copy } = useInstallCopy()
   const npmLabel = copied ? 'Copied!' : getNpmInstallLabel()
@@ -166,26 +146,23 @@ export function LandingPage({
         </div>
       </nav>
 
-      {/* HERO — split layout, product visual on the right */}
+      {/* HERO — one plain promise + immediate payoff */}
       <section className="mx-auto grid max-w-6xl items-center gap-12 px-6 pb-16 pt-12 lg:grid-cols-2 lg:gap-10 lg:pb-24 lg:pt-20">
         <div className="text-center lg:text-left">
           <p className="text-sm font-bold uppercase tracking-[0.3em] text-violet-600 md:tracking-[0.34em]">
-            Agentic Development Environment
+            The home for your AI coding
           </p>
           <h1 className="mt-5 text-4xl font-semibold leading-[1.05] tracking-tight text-neutral-900 md:text-6xl">
-            Switch AI models.
+            The AI workspace that
             <br />
             <span className="bg-gradient-to-r from-violet-600 via-fuchsia-500 to-amber-500 bg-clip-text text-transparent">
-              Keep your context.
-            </span>
-            <br />
-            <span className="bg-gradient-to-r from-violet-600 via-fuchsia-500 to-amber-500 bg-clip-text text-transparent">
-              Crush token waste.
+              never forgets your project.
             </span>
           </h1>
           <p className="mx-auto mt-5 max-w-md text-[17px] leading-relaxed text-neutral-600 lg:mx-0">
-            PRISM is the agentic development environment models run inside — model-agnostic, with a
-            persistent architectural memory that belongs to your project, not to any single AI provider.
+            Build software with any AI — Claude, ChatGPT, Gemini — in one place that remembers your
+            whole project. No more re-explaining your code every time. No more starting over when you
+            switch tools.
           </p>
 
           <div className="mt-8">
@@ -206,58 +183,16 @@ export function LandingPage({
         </div>
       </section>
 
-      {/* COMPRESSION STACK — RTK, Headroom, graph budgeting */}
+      {/* OUTCOMES — the whole pitch in three plain glances */}
       <section className="mx-auto max-w-6xl px-6 pb-12">
-        <div className="rounded-2xl border border-violet-200/80 bg-gradient-to-br from-violet-50/90 via-white to-fuchsia-50/40 p-8 backdrop-blur-sm sm:p-10">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-              <p className="text-sm font-bold uppercase tracking-[0.28em] text-violet-600">Compression stack</p>
-              <h2 className="mt-2 text-2xl font-semibold text-neutral-900 sm:text-3xl">
-                RTK + Headroom + graph budgeting
-              </h2>
-              <p className="mt-2 max-w-xl text-[15px] leading-relaxed text-neutral-600">
-                Most agents burn tokens on repeated logs, bloated tool JSON, and unfocused file dumps. PRISM attacks
-                waste at three layers — locally, before your bill grows.
-              </p>
-            </div>
-            <button
-              type="button"
-              onClick={onTechnologies}
-              className="inline-flex shrink-0 items-center gap-1.5 text-[14px] font-medium text-violet-600 hover:text-violet-700"
-            >
-              See the full stack
-              <ArrowRight className="h-4 w-4" />
-            </button>
-          </div>
-          <div className="mt-8 grid gap-4 sm:grid-cols-3">
-            {COMPRESSION_LAYERS.map((layer) => (
-              <div
-                key={layer.layer}
-                className="rounded-xl border border-violet-100 bg-white/90 p-5 shadow-sm"
-              >
-                <p className="text-[11px] font-bold uppercase tracking-wider text-violet-600">{layer.layer}</p>
-                <p className="mt-1 text-[15px] font-semibold text-neutral-900">{layer.tech}</p>
-                <p className="mt-2 text-[13px] leading-relaxed text-neutral-600">{layer.body}</p>
-              </div>
-            ))}
-          </div>
-          <p className="mt-6 text-center text-[12px] text-neutral-500 sm:text-left">
-            Headroom runs on desktop/local engine when enabled. Cloud engine uses RTK + graph budgeting in v1.{' '}
-            <button
-              type="button"
-              onClick={onIntegrations}
-              className="font-medium text-violet-600 hover:text-violet-700"
-            >
-              View integrations →
-            </button>
+        <div className="mb-8 text-center">
+          <h2 className="text-2xl font-semibold text-neutral-900 sm:text-3xl">Why people love PRISM</h2>
+          <p className="mx-auto mt-3 max-w-2xl text-[15px] leading-relaxed text-neutral-600">
+            Three things that change how it feels to build software with AI.
           </p>
         </div>
-      </section>
-
-      {/* PILLARS — the whole pitch in three glances */}
-      <section className="mx-auto max-w-6xl px-6 pb-8">
         <div className="grid gap-4 sm:grid-cols-3">
-          {PILLARS.map((p) => (
+          {OUTCOMES.map((p) => (
             <div
               key={p.title}
               className="rounded-2xl border border-neutral-200/80 bg-white/70 p-6 backdrop-blur-sm"
@@ -272,37 +207,83 @@ export function LandingPage({
         </div>
       </section>
 
-      {/* POSITIONING — model agnostic + architectural memory */}
-      <section className="mx-auto max-w-6xl px-6 pb-12">
-        <div className="mb-8 text-center lg:text-left">
-          <p className="text-sm font-bold uppercase tracking-[0.28em] text-violet-600">Why PRISM</p>
+      {/* COMPARISON — PRISM vs typical AI coding tools */}
+      <section className="mx-auto max-w-4xl px-6 pb-14">
+        <div className="mb-7 text-center">
+          <p className="text-sm font-bold uppercase tracking-[0.28em] text-violet-600">The difference</p>
           <h2 className="mt-3 text-2xl font-semibold text-neutral-900 sm:text-3xl">
-            The environment — not another model
+            PRISM vs. the rest
           </h2>
-          <p className="mx-auto mt-3 max-w-2xl text-[15px] leading-relaxed text-neutral-600 lg:mx-0">
-            You are not competing with OpenAI, Anthropic, or Google. PRISM is where all of them work on
-            the same codebase, with the same history, under your control.
-          </p>
         </div>
-        <div className="grid gap-6 lg:grid-cols-2">
-          {POSITIONING.map((item) => (
+        <div className="overflow-hidden rounded-2xl border border-neutral-200/80 bg-white/80 backdrop-blur-sm">
+          <div className="grid grid-cols-[1fr_auto_auto] items-center gap-2 border-b border-neutral-200 bg-neutral-50/80 px-4 py-3 sm:px-6">
+            <span className="text-[13px] font-semibold text-neutral-500">What matters</span>
+            <span className="w-20 text-center text-[13px] font-bold text-violet-700 sm:w-28">PRISM</span>
+            <span className="w-20 text-center text-[13px] font-medium text-neutral-400 sm:w-28">Other tools</span>
+          </div>
+          {COMPARISON.map((row) => (
             <div
-              key={item.title}
-              className="rounded-2xl border border-neutral-200/80 bg-white/80 p-7 backdrop-blur-sm"
+              key={row.label}
+              className="grid grid-cols-[1fr_auto_auto] items-center gap-2 border-b border-neutral-100 px-4 py-3.5 last:border-b-0 sm:px-6"
             >
-              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500/15 to-fuchsia-500/10">
-                <item.icon className="h-5 w-5 text-violet-600" />
-              </div>
-              <h3 className="mt-4 text-[18px] font-semibold text-neutral-900">{item.title}</h3>
-              <p className="mt-2 text-[14px] leading-relaxed text-neutral-600">{item.body}</p>
+              <span className="text-[14px] font-medium text-neutral-800">{row.label}</span>
+              <span className="flex w-20 justify-center sm:w-28">
+                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
+                  <Check className="h-4 w-4" />
+                </span>
+              </span>
+              <span className="flex w-20 flex-col items-center gap-0.5 sm:w-28">
+                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-neutral-100 text-neutral-400">
+                  <X className="h-4 w-4" />
+                </span>
+                <span className="hidden text-center text-[10px] leading-tight text-neutral-400 sm:block">
+                  {row.othersNote}
+                </span>
+              </span>
             </div>
           ))}
         </div>
-        <p className="mt-6 text-center text-[13px] leading-relaxed text-neutral-500 lg:text-left">
-          Every agent session writes to the execution ledger and datalog — summaries, file changes, and
-          reasoning — so the next model (or the same one weeks later) picks up a well-maintained record
-          of how your software was actually built.
-        </p>
+      </section>
+
+      {/* VISION / TRUST — full transparency turned into a credibility asset */}
+      <section className="mx-auto max-w-6xl px-6 pb-12">
+        <div className="rounded-2xl border border-violet-200/80 bg-gradient-to-br from-violet-50/90 via-white to-fuchsia-50/40 p-8 backdrop-blur-sm sm:p-10">
+          <div className="grid gap-8 lg:grid-cols-2 lg:items-center">
+            <div>
+              <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500/15 to-fuchsia-500/10">
+                <Sparkles className="h-5 w-5 text-violet-600" />
+              </div>
+              <p className="text-sm font-bold uppercase tracking-[0.28em] text-violet-600">The bigger picture</p>
+              <h2 className="mt-2 text-2xl font-semibold text-neutral-900 sm:text-3xl">
+                We’re building the brain for the next generation of AI agents
+              </h2>
+              <p className="mt-3 text-[15px] leading-relaxed text-neutral-600">
+                Every time an AI takes an action and the project reacts, that’s a lesson in how software
+                really gets built. With your permission, PRISM learns from those lessons to train smarter,
+                more reliable AI agents for everyone — and we’re completely open about it.
+              </p>
+            </div>
+            <div className="rounded-xl border border-violet-100 bg-white/90 p-6 shadow-sm">
+              <div className="mb-3 flex items-center gap-2">
+                <ShieldCheck className="h-5 w-5 text-emerald-600" />
+                <h3 className="text-[16px] font-semibold text-neutral-900">Your code stays yours</h3>
+              </div>
+              <ul className="space-y-2.5 text-[14px] leading-relaxed text-neutral-600">
+                <li className="flex gap-2"><Check className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" /> Off by default — nothing is shared unless you opt in.</li>
+                <li className="flex gap-2"><Check className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" /> Your source code, files, and prompts never leave your device.</li>
+                <li className="flex gap-2"><Check className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" /> Only anonymized, structural signals — and you can turn it off anytime.</li>
+              </ul>
+              <button
+                type="button"
+                onClick={onPrivacy}
+                className="mt-4 inline-flex items-center gap-1.5 text-[14px] font-medium text-violet-600 hover:text-violet-700"
+              >
+                Read exactly what we collect
+                <ArrowRight className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+        </div>
       </section>
 
       {/* VISUAL PROOF — compact memory graph */}
@@ -317,9 +298,9 @@ export function LandingPage({
                 Idea to live URL without leaving PRISM
               </h2>
               <p className="mt-3 text-[15px] leading-relaxed text-neutral-600">
-                Connect GitHub and Vercel once. Preview locally inside the app. Hit Deploy — PRISM commits,
-                pushes, and shows you the live link when Vercel finishes. No terminal. No git commands. If
-                something breaks, your agents already have the project context to fix it.
+                Connect your accounts once. Preview your app right inside PRISM. Hit Deploy and PRISM
+                publishes it and hands you the live link — no terminal, no commands. If something breaks,
+                your AI already knows your project well enough to fix it.
               </p>
             </div>
             <ol className="space-y-3 text-[14px] text-neutral-700">
@@ -344,7 +325,7 @@ export function LandingPage({
       <section className="mx-auto max-w-6xl px-6 pb-16">
         <div className="rounded-2xl border border-neutral-200/80 bg-white/60 p-6 backdrop-blur-sm sm:p-8">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <h2 className="text-xl font-semibold text-neutral-900 sm:text-2xl">Everything under the hood</h2>
+            <h2 className="text-xl font-semibold text-neutral-900 sm:text-2xl">Everything you get</h2>
             <button
               type="button"
               onClick={onFeaturesDetail}
@@ -366,7 +347,7 @@ export function LandingPage({
             ))}
           </div>
           <p className="mt-4 text-center text-[12px] text-neutral-500 sm:text-left">
-            Desktop: RTK + Headroom + graph. Cloud: RTK + graph token budgeting.
+            Smart context handling keeps your AI fast and your costs low — automatically.
           </p>
         </div>
       </section>
@@ -430,6 +411,11 @@ export function LandingPage({
               <button type="button" onClick={onPrivacy} className="hover:text-neutral-800">
                 Privacy
               </button>
+              {onTerms && (
+                <button type="button" onClick={onTerms} className="hover:text-neutral-800">
+                  Terms
+                </button>
+              )}
             </div>
           </div>
           <p className="mt-4 text-center text-[12px] text-neutral-400">

@@ -9,7 +9,7 @@ interface PrivacyPolicyPageProps {
   onBack: () => void
 }
 
-const LAST_UPDATED = 'June 21, 2026'
+const LAST_UPDATED = 'June 27, 2026'
 
 export function PrivacyPolicyPage({ onBack }: PrivacyPolicyPageProps) {
   return (
@@ -39,9 +39,28 @@ export function PrivacyPolicyPage({ onBack }: PrivacyPolicyPageProps) {
           <section>
             <h2 className="mb-3 text-xl font-semibold text-neutral-900">Overview</h2>
             <p>
-              PRISM is a proprietary desktop shell and web workspace backed by a cloud-hosted intelligence engine.
+              PRISM is an open-source desktop shell and web workspace backed by a cloud-hosted intelligence engine.
               This policy describes what data the PRISM project and its services collect, how it is used, and your
               choices. By using the PRISM website, desktop app, or cloud engine, you agree to this policy.
+            </p>
+          </section>
+
+          <section className="rounded-xl border border-violet-200 bg-violet-50/60 p-5">
+            <h2 className="mb-3 text-xl font-semibold text-neutral-900">Our bigger mission (full transparency)</h2>
+            <p>
+              We want to be completely upfront about why PRISM exists. Beyond being a great coding tool, PRISM is
+              building a <strong>world model for AI agents</strong> — a high-fidelity map of how autonomous agents
+              take actions in real software environments and how those environments react. Today&apos;s frontier AI
+              labs struggle to train agents that can reliably operate computers, because running trial-and-error in
+              real systems is slow, expensive, and risky. By learning from the causal loop of{' '}
+              <em>state → action → resulting state</em> across many real sessions, we aim to build the training
+              ground and action models that power the next generation of autonomous coding, DevOps, and security
+              agents.
+            </p>
+            <p className="mt-3">
+              This is why we offer the optional <strong>PRISM Intelligence Engine</strong> below. It is the engine of
+              that mission — and it is built so that contributing <strong>never requires sharing your source code</strong>.
+              It is off by default and entirely your choice.
             </p>
           </section>
 
@@ -154,34 +173,83 @@ export function PrivacyPolicyPage({ onBack }: PrivacyPolicyPageProps) {
           </section>
 
           <section>
-            <h2 className="mb-3 text-xl font-semibold text-neutral-900">Anonymized developer telemetry (opt-in)</h2>
+            <h2 className="mb-3 text-xl font-semibold text-neutral-900">PRISM Intelligence Engine (opt-in, off by default)</h2>
             <p>
-              With your explicit consent via &quot;Join the PRISM Intelligence Engine&quot; in settings, we collect
-              anonymized, token-stripped metadata regarding agent workflow sequences, tool usage, and terminal execution
-              logs. We do not collect, view, or store your raw source code, proprietary variables, or personally
-              identifiable information. This behavioral telemetry is strictly used to train and improve autonomous
-              software engineering models. The feature is off by default and can be disabled at any time.
+              With your explicit consent via &quot;Join the PRISM Intelligence Engine&quot; in settings, PRISM
+              contributes <strong>abstracted</strong> action → state records to the world-model dataset described
+              above. Every record is built and scrubbed <strong>on your device</strong> before anything is sent. We
+              do not collect, view, or store your raw source code, file contents, prompts, model responses, file
+              names, or personally identifiable information.
             </p>
-            <p className="mt-3">
+
+            <div className="mt-4 grid gap-4 sm:grid-cols-2">
+              <div className="rounded-lg border border-emerald-200 bg-emerald-50/60 p-4">
+                <h3 className="mb-2 font-semibold text-emerald-800">What we collect</h3>
+                <ul className="list-disc space-y-1.5 pl-4 text-[14px] text-neutral-700">
+                  <li>Which tool or command ran (e.g. &quot;search&quot;, &quot;shell&quot;) and the <em>shape</em> of its inputs — types and sizes, never values</li>
+                  <li>Outcome (success / error / partial) and a coarse error category (e.g. &quot;type_error&quot;)</li>
+                  <li>Structural deltas: count of files changed, lines added/removed, code-structure counts</li>
+                  <li>Terminal exit codes and failure → recovery sequences</li>
+                </ul>
+              </div>
+              <div className="rounded-lg border border-red-200 bg-red-50/60 p-4">
+                <h3 className="mb-2 font-semibold text-red-800">What never leaves your device</h3>
+                <ul className="list-disc space-y-1.5 pl-4 text-[14px] text-neutral-700">
+                  <li>Your source code or file contents</li>
+                  <li>Your prompts or the model&apos;s responses</li>
+                  <li>File names, paths, or repository identity</li>
+                  <li>API keys, secrets, or personal information (scrubbed on-device first)</li>
+                </ul>
+              </div>
+            </div>
+
+            <p className="mt-4">
               If you opt out, compute usage is rate-limited to 600,000 tokens per 5-hour window (with a soft prompt at
-              100,000 tokens per hour). Opting in removes this cap.
+              100,000 tokens per hour). Opting in removes this cap. You can withdraw consent at any time in
+              Connections; collection stops immediately.
             </p>
-            <h3 className="mb-2 mt-4 font-semibold text-neutral-800">Sample telemetry record (anonymized)</h3>
+
+            <h3 className="mb-2 mt-4 font-semibold text-neutral-800">Sample record (exactly what is sent)</h3>
             <pre className="overflow-x-auto rounded-lg border border-neutral-200 bg-neutral-50 p-4 text-[12px] text-neutral-700">
 {`{
-  "event_type": "agent_run_complete",
-  "tokens": 1842,
-  "model": "claude-code",
-  "metadata": {
-    "tools_used": ["search_code", "ledger_search"],
-    "session_id_hash": "a3f9…c21",
+  "schemaVersion": 1,
+  "session_hash": "s_1a2b3c",
+  "stateBefore": { "lastExitCode": 1 },
+  "action": {
+    "kind": "tool_call",
+    "name": "search_code",
+    "argShape": { "query": "string(42)" }
+  },
+  "transition": {
     "outcome": "success",
-    "duration_ms": 4200
-  }
+    "filesTouched": 2,
+    "errorClass": null
+  },
+  "recoveryOf": "prior-failed-record-id"
 }`}
             </pre>
             <p className="mt-2 text-[14px] text-neutral-600">
-              No file contents, API keys, or user identifiers are included — only scrubbed workflow statistics.
+              No file contents, paths, prompts, API keys, or user identifiers are included — only abstracted,
+              scrubbed structure.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="mb-3 text-xl font-semibold text-neutral-900">Your rights (GDPR &amp; CCPA)</h2>
+            <p>
+              Wherever you live, we aim to honor the rights granted under the EU/UK GDPR and the California CCPA/CPRA:
+            </p>
+            <ul className="mt-2 list-disc space-y-2 pl-5">
+              <li><strong>Access &amp; portability:</strong> request a copy of the data associated with your account.</li>
+              <li><strong>Deletion (&quot;right to be forgotten&quot;):</strong> request deletion of your contributed records. Intelligence-Engine records are linked to your account id so they can be located and removed.</li>
+              <li><strong>Withdraw consent:</strong> toggle off &quot;Join the PRISM Intelligence Engine&quot; anytime; future collection stops immediately.</li>
+              <li><strong>Object / restrict:</strong> object to processing or ask us to restrict it.</li>
+              <li><strong>No sale of personal data:</strong> we do not sell personal information. The world-model dataset is abstracted and non-identifying by construction.</li>
+              <li><strong>Legal basis:</strong> for the optional Intelligence Engine we rely on your explicit consent; for operating the service we rely on legitimate interest and contract.</li>
+            </ul>
+            <p className="mt-3">
+              To exercise any of these, open an issue or contact us via the channel below. We will respond within the
+              timeframes required by applicable law.
             </p>
           </section>
 

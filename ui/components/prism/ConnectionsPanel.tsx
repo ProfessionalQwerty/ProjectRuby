@@ -13,7 +13,12 @@ import { cn } from '../../lib/utils'
 import type { useConnections } from '../../hooks/useConnections'
 import { MODEL_CATALOG, type ModelProviderId } from '../../lib/models'
 import { ModelLogo } from '../ui/ModelLogo'
-import { isTelemetryOptedIn, setTelemetryOptIn } from '../../lib/telemetry-consent'
+import {
+  isTelemetryOptedIn,
+  setTelemetryOptIn,
+  TELEMETRY_COLLECTED,
+  TELEMETRY_NEVER_COLLECTED,
+} from '../../lib/telemetry-consent'
 import { runLlmOAuthSignIn } from '../../lib/llm-auth'
 import { setTelemetryOptInRemote } from '../../lib/team-api'
 
@@ -299,10 +304,39 @@ export function ConnectionsPanel({ apiOnline, connections, canManageModels = tru
           PRISM Intelligence Engine
         </h3>
         <p className="text-[12px] leading-relaxed text-neutral-600 dark:text-neutral-400">
-          Opt in to send anonymized, RTK-scrubbed workflow telemetry — never raw source code. Helps train better
-          autonomous coding models. Off by default.
+          Contribute anonymized, abstracted signals from your sessions to help train a world model of how
+          AI agents work in real software environments. Off by default — your source code never leaves your device.
         </p>
-        <label className="flex cursor-pointer items-center gap-2 text-[13px]">
+
+        <details className="group rounded-md border border-violet-200/60 bg-white/50 p-2 dark:border-violet-900/60 dark:bg-neutral-900/40">
+          <summary className="cursor-pointer list-none text-[12px] font-medium text-violet-700 dark:text-violet-300">
+            What exactly is shared?
+          </summary>
+          <div className="mt-2 space-y-2">
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-wide text-emerald-700 dark:text-emerald-400">
+                Collected
+              </p>
+              <ul className="mt-1 list-disc space-y-0.5 pl-4 text-[11px] leading-relaxed text-neutral-600 dark:text-neutral-300">
+                {TELEMETRY_COLLECTED.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+            </div>
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-wide text-red-700 dark:text-red-400">
+                Never collected
+              </p>
+              <ul className="mt-1 list-disc space-y-0.5 pl-4 text-[11px] leading-relaxed text-neutral-600 dark:text-neutral-300">
+                {TELEMETRY_NEVER_COLLECTED.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </details>
+
+        <label className="flex cursor-pointer items-center gap-2 text-[13px] text-neutral-700 dark:text-neutral-200">
           <input
             type="checkbox"
             checked={telemetryOn}
