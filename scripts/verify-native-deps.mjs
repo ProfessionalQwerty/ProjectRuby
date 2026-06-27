@@ -1,12 +1,10 @@
 /**
  * Fail the pack step if node-pty was not staged under desktop/dist/node_modules.
- * CI requires electron-rebuild output (build/Release), not Node.js prebuilds.
  */
-import { existsSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 
 const ROOT = process.cwd()
-const IS_CI = process.env.CI === 'true' || process.env.GITHUB_ACTIONS === 'true'
 const ptyRoot = join(ROOT, 'desktop', 'dist', 'node_modules', 'node-pty')
 const indexJs = join(ptyRoot, 'lib', 'index.js')
 
@@ -34,6 +32,13 @@ if (!existsSync(indexJs)) {
   process.exit(1)
 }
 
+let pkgVersion = ''
+try {
+  pkgVersion = JSON.parse(readFileSync(join(ptyRoot, 'package.json'), 'utf8')).version || ''
+} catch {
+  // ignore
+}
+
 const natives = nativeCandidates()
 if (natives.length === 0) {
   console.error('[verify-native-deps] No native node-pty binary found for this platform.')
@@ -41,13 +46,5 @@ if (natives.length === 0) {
 }
 
 const rebuilt = natives.some((p) => p.includes('build') && p.includes('Release'))
-if (IS_CI && !rebuilt) {
-  console.error(
-    '[verify-native-deps] CI requires build/Release/*.node from electron-rebuild, not prebuilds alone.'
-  )
-  process.exit(1)
-}
-
-console.log(
-  `[verify-native-deps] node-pty OK (${rebuilt ? 'electron-rebuild build/Release' : 'prebuilds'}) — ${natives.length} binary(s)`
-)
+const mode = rebuilt ? 'electron-rebuild build/Release' : 'platform prebuilds'
+console.log(`[verify-native-deps] node-pty ${pkgVersion} OK (${mode}) — ${natives.length} binary(s)`)

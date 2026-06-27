@@ -9,6 +9,10 @@ permissions:
   contents: write
   actions: read
 
+defaults:
+  run:
+    shell: bash
+
 jobs:
   build:
     strategy:
@@ -35,14 +39,15 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 24
           cache: npm
           cache-dependency-path: package-lock.json
 
       - name: Sync package version from release tag
-        shell: bash
         run: |
+          # Supports v0.3.4 and accidental v.0.3.4 tag formats
           VERSION="${GITHUB_REF_NAME#v}"
+          VERSION="${VERSION#.}"
           export VERSION
           echo "Setting workspace version to ${VERSION}"
           node -e "
@@ -64,7 +69,6 @@ jobs:
         run: npm run generate-icons
 
       - name: Verify cloud build secrets
-        shell: bash
         run: |
           if [ -z "$VITE_HF_ACCESS_TOKEN" ]; then
             echo "::error::VITE_HF_ACCESS_TOKEN is empty. Add it under repo Settings → Secrets → Actions (read token for your private HF Space)."
@@ -81,7 +85,6 @@ jobs:
           VITE_PRISM_CLIENT_KEY: ${{ secrets.VITE_PRISM_CLIENT_KEY }}
 
       - name: Write production env for Vite
-        shell: bash
         run: |
           {
             echo "VITE_ELECTRON=1"
@@ -101,10 +104,15 @@ jobs:
         if: matrix.platform == 'linux'
         run: |
           sudo apt-get update
-          sudo apt-get install -y libfuse2 desktop-file-utils build-essential python3
+          sudo apt-get install -y libfuse2 desktop-file-utils
 
       - name: Build UI and desktop
-        run: npm run build:electron && npm run rebuild:native && node scripts/copy-main-deps.mjs && node scripts/verify-native-deps.mjs && npm run verify-cloud-build
+        run: |
+          npm run build:electron
+          npm run rebuild:native
+          node scripts/copy-main-deps.mjs
+          node scripts/verify-native-deps.mjs
+          npm run verify-cloud-build
         env:
           VITE_ELECTRON: '1'
           VITE_API_URL: https://yashshshsh-prism.hf.space
@@ -122,14 +130,6 @@ jobs:
         run: node scripts/verify-asar-node-pty.mjs
 
       - name: Build installers
-        if: matrix.platform == 'linux'
-        run: npx electron-builder --config electron-builder.yml --linux
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
-
-      - name: Build installers
-        if: matrix.platform != 'linux'
         run: npm run dist:only
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -187,7 +187,6 @@ jobs:
         run: ls -la release/
 
       - name: Verify auto-update metadata
-        shell: bash
         run: |
           if [ ! -f release/latest.yml ] && [ ! -f release/latest-mac.yml ] && [ ! -f release/latest-linux.yml ]; then
             echo "::warning::latest.yml not found — in-app auto-update may not work until electron-builder publish metadata is present"

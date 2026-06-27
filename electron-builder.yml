@@ -44,9 +44,15 @@ win:
 
 mac:
   target:
-    - dmg
-    - zip
-  artifactName: PRISM-mac-x64.${ext}
+    - target: dmg
+      arch:
+        - arm64
+        - x64
+    - target: zip
+      arch:
+        - arm64
+        - x64
+  artifactName: PRISM-mac-${arch}.${ext}
   category: public.app-category.developer-tools
 
 linux:

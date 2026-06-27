@@ -1,9 +1,9 @@
 /**
- * Rebuild node-pty against Electron headers.
+ * Prepare node-pty native binaries for Electron packaging.
  *
- * - CI (CI=true): rebuild MUST succeed — no prebuild fallback.
- * - Local + PRISM_PTY_BETA=1 or beta installed: skip rebuild (Windows VS2026 workaround).
- * - Local otherwise: rebuild, then fall back to prebuilds only when not CI.
+ * node-pty@1.2.0-beta.13 ships platform prebuilds and avoids node-gyp on CI
+ * (required for Windows VS2026 / node-gyp 18 locally). Stable 1.1.0 still needs
+ * electron-rebuild when prebuilds are absent.
  */
 import { spawnSync } from 'node:child_process'
 import { existsSync, readFileSync } from 'node:fs'
@@ -26,8 +26,8 @@ function resolvePtyRoot() {
 
 function resolveElectronVersion() {
   const candidates = [
-    join(ROOT, 'desktop', 'node_modules', 'electron', 'package.json'),
     join(ROOT, 'node_modules', 'electron', 'package.json'),
+    join(ROOT, 'desktop', 'node_modules', 'electron', 'package.json'),
   ]
   for (const p of candidates) {
     try {
@@ -65,7 +65,7 @@ function hasNativeBinary(ptyRoot) {
   return false
 }
 
-function isBetaPty(version) {
+function isPrebuildPty(version) {
   return version.includes('beta')
 }
 
@@ -73,21 +73,19 @@ const ptyRoot = resolvePtyRoot()
 const version = ptyVersion(ptyRoot)
 const electronVersion = resolveElectronVersion()
 
-if (SKIP_REBUILD || (!IS_CI && (process.env.PRISM_PTY_BETA === '1' || isBetaPty(version)))) {
+if (SKIP_REBUILD || isPrebuildPty(version)) {
   console.log(
-    `[rebuild-native] Skipping electron-rebuild (pty=${version || 'unknown'}, CI=${IS_CI}, beta=${isBetaPty(version)})`
+    `[rebuild-native] Using node-pty prebuilds (version=${version || 'unknown'}, CI=${IS_CI})`
   )
   if (!hasNativeBinary(ptyRoot)) {
-    console.error('[rebuild-native] No native node-pty binary present after skip.')
+    console.error('[rebuild-native] node-pty prebuild/native binary missing for this platform.')
     process.exit(1)
   }
   process.exit(0)
 }
 
-const moduleDir = existsSync(join(ROOT, 'desktop', 'node_modules'))
-  ? join(ROOT, 'desktop', 'node_modules')
-  : join(ROOT, 'node_modules')
-
+// Stable node-pty — compile against Electron headers (root hoisted electron).
+const moduleDir = join(ROOT, 'node_modules')
 const args = ['@electron/rebuild', '-f', '-w', 'node-pty', '-m', moduleDir]
 if (electronVersion) args.push('--version', electronVersion)
 
@@ -96,7 +94,7 @@ console.log(`[rebuild-native] npx ${args.join(' ')}`)
 const result = spawnSync('npx', args, {
   cwd: ROOT,
   stdio: 'inherit',
-  shell: true,
+  shell: process.platform === 'win32',
 })
 
 if (result.status === 0) {

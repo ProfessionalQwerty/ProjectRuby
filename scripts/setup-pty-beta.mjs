@@ -1,11 +1,8 @@
 #!/usr/bin/env node
 /**
- * Local Windows dev only — install node-pty@beta into the desktop workspace
- * without updating package-lock.json (VS2026 / node-gyp 18 workaround).
- *
- * Usage:
- *   npm run setup:pty-beta
- *   set PRISM_PTY_BETA=1 && npm run dev
+ * Optional: reinstall node-pty@beta without touching package-lock.json.
+ * Committed desktop already pins 1.2.0-beta.13 — you only need this after
+ * `npm ci` if you temporarily downgraded for testing.
  */
 import { spawnSync } from 'node:child_process'
 import { join } from 'node:path'
@@ -13,11 +10,11 @@ import { join } from 'node:path'
 const ROOT = process.cwd()
 
 if (process.platform !== 'win32') {
-  console.log('[setup-pty-beta] Skipped — only needed on Windows.')
+  console.log('[setup-pty-beta] Skipped — only needed on Windows when lockfile drifted.')
   process.exit(0)
 }
 
-console.log('[setup-pty-beta] Installing node-pty@1.2.0-beta.13 into desktop workspace (no lockfile change)...')
+console.log('[setup-pty-beta] Reinstalling node-pty@1.2.0-beta.13 into desktop workspace...')
 
 const result = spawnSync(
   'npm',
@@ -25,10 +22,4 @@ const result = spawnSync(
   { cwd: ROOT, stdio: 'inherit', shell: true }
 )
 
-if (result.status !== 0) {
-  process.exit(result.status || 1)
-}
-
-console.log('[setup-pty-beta] Done. Run with:')
-console.log('  set PRISM_PTY_BETA=1')
-console.log('  npm run dev')
+process.exit(result.status || 0)

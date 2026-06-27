@@ -19,7 +19,7 @@
     "rebuild:native": "node scripts/rebuild-native.mjs",
     "setup:pty-beta": "node scripts/setup-pty-beta.mjs",
     "dist": "npm run build:electron && npm run dist:only",
-    "dist:only": "npm run rebuild:native && node scripts/copy-main-deps.mjs && node scripts/verify-native-deps.mjs && node scripts/copy-rtk-binaries.mjs && cross-env CSC_IDENTITY_AUTO_DISCOVERY=false electron-builder --config electron-builder.yml",
+    "dist:only": "node scripts/copy-rtk-binaries.mjs && cross-env CSC_IDENTITY_AUTO_DISCOVERY=false electron-builder --config electron-builder.yml",
     "dist:publish": "npm run build:electron && cross-env CSC_IDENTITY_AUTO_DISCOVERY=false electron-builder --config electron-builder.yml --publish always",
     "verify-cloud-build": "node scripts/verify-cloud-build.mjs",
     "generate-icons": "node scripts/generate-icons.js",
@@ -53,6 +53,6 @@
     "tar": "^7.4.3"
   },
   "overrides": {
-    "node-pty": "1.1.0"
+    "node-pty": "1.2.0-beta.13"
   }
 }
